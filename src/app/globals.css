@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 20% 98%;
+    --foreground: 30 10% 10%;
+    --card: 30 20% 100%;
+    --card-foreground: 30 10% 10%;
+    --popover: 30 20% 100%;
+    --popover-foreground: 30 10% 10%;
+    --primary: 24 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 15% 92%;
+    --secondary-foreground: 30 10% 20%;
+    --muted: 30 15% 95%;
+    --muted-foreground: 30 10% 45%;
+    --accent: 142 70% 45%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 30 15% 88%;
+    --input: 30 15% 88%;
+    --ring: 24 100% 50%;
+    --radius: 0.75rem;
+    --chart-1: 24 100% 50%;
+    --chart-2: 142 70% 45%;
+    --chart-3: 200 80% 50%;
+    --chart-4: 280 70% 55%;
+    --chart-5: 45 95% 55%;
+  }
+
+  .dark {
+    --background: 30 10% 8%;
+    --foreground: 30 10% 95%;
+    --card: 30 10% 12%;
+    --card-foreground: 30 10% 95%;
+    --popover: 30 10% 12%;
+    --popover-foreground: 30 10% 95%;
+    --primary: 24 100% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 10% 18%;
+    --secondary-foreground: 30 10% 90%;
+    --muted: 30 10% 20%;
+    --muted-foreground: 30 10% 60%;
+    --accent: 142 70% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 30 10% 20%;
+    --input: 30 10% 20%;
+    --ring: 24 100% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .animate-in {
+    animation: fade-in 0.5s ease-out forwards;
+  }
+  
+  .delay-100 {
+    animation-delay: 100ms;
+  }
+  
+  .delay-200 {
+    animation-delay: 200ms;
+  }
+  
+  .delay-300 {
+    animation-delay: 300ms;
+  }
+}
+
+/* Menu Style Themes */
+.menu-modern {
+  --menu-bg: 0 0% 100%;
+  --menu-text: 0 0% 10%;
+  --menu-accent: 24 100% 50%;
+  font-family: var(--font-sans);
+}
+
+.menu-vintage {
+  --menu-bg: 40 30% 96%;
+  --menu-text: 30 20% 20%;
+  --menu-accent: 15 70% 40%;
+  font-family: var(--font-serif);
+}
+
+.menu-minimal {
+  --menu-bg: 0 0% 100%;
+  --menu-text: 0 0% 5%;
+  --menu-accent: 0 0% 30%;
+  font-family: var(--font-sans);
+  letter-spacing: 0.05em;
+}
+
+/* Smooth page transitions */
+.page-transition {
+  @apply transition-all duration-300 ease-out;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-muted/30;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/20 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/30;
+}

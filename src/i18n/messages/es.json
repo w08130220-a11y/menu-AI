@@ -1,0 +1,175 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "back": "Volver",
+    "next": "Siguiente",
+    "confirm": "Confirmar",
+    "error": "Error",
+    "success": "Éxito"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "newMenu": "Nuevo Menú",
+    "pricing": "Precios",
+    "signIn": "Iniciar Sesión",
+    "signOut": "Cerrar Sesión",
+    "settings": "Configuración"
+  },
+  "landing": {
+    "hero": {
+      "title": "Generador de Menús con IA",
+      "subtitle": "Crea menús de restaurante impresionantes en segundos. Sube tu menú existente o empieza desde cero – nuestra IA lo transforma en un menú profesionalmente diseñado.",
+      "cta": "Comenzar Gratis",
+      "ctaSecondary": "Ver Demo"
+    },
+    "features": {
+      "title": "Todo lo que Necesitas",
+      "upload": {
+        "title": "Subir y Transformar",
+        "description": "Sube tu menú existente (PDF o imagen) y deja que la IA lo extraiga y embellezca."
+      },
+      "generate": {
+        "title": "Generación con IA",
+        "description": "Genera menús completos desde cero basados en el tipo de tu restaurante y preferencias."
+      },
+      "styles": {
+        "title": "Múltiples Estilos",
+        "description": "Elige entre temas Moderno, Vintage o Minimalista con vista previa instantánea."
+      },
+      "export": {
+        "title": "Exportar a Cualquier Lugar",
+        "description": "Descarga como PDF, genera códigos QR, o incrusta directamente en tu sitio web."
+      }
+    },
+    "pricing": {
+      "title": "Precios Simples",
+      "subtitle": "Un plan, menús ilimitados.",
+      "price": "$9",
+      "period": "/mes",
+      "features": [
+        "Creación ilimitada de menús",
+        "Subida y refinamiento con IA",
+        "Todas las plantillas de estilo",
+        "Exportación PDF y códigos QR",
+        "Soporte multilingüe",
+        "Soporte prioritario"
+      ],
+      "cta": "Iniciar Prueba Gratis"
+    }
+  },
+  "auth": {
+    "signIn": {
+      "title": "Bienvenido de Nuevo",
+      "subtitle": "Inicia sesión en tu cuenta para continuar",
+      "google": "Continuar con Google",
+      "divider": "o",
+      "email": "Correo Electrónico",
+      "password": "Contraseña",
+      "submit": "Iniciar Sesión",
+      "noAccount": "¿No tienes una cuenta?",
+      "signUp": "Regístrate"
+    }
+  },
+  "dashboard": {
+    "title": "Tus Menús",
+    "empty": {
+      "title": "Sin menús aún",
+      "description": "Crea tu primer menú con IA para comenzar.",
+      "cta": "Crear Menú"
+    },
+    "menuCard": {
+      "dishes": "{count} platos",
+      "lastUpdated": "Actualizado {date}",
+      "view": "Ver",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "download": "Descargar PDF",
+      "qrCode": "Código QR"
+    },
+    "subscription": {
+      "free": "Plan Gratis",
+      "pro": "Plan Pro",
+      "upgrade": "Actualizar a Pro",
+      "manage": "Gestionar Suscripción",
+      "menusLeft": "{count} menús gratis restantes"
+    }
+  },
+  "menu": {
+    "create": {
+      "title": "Crear Nuevo Menú",
+      "tabs": {
+        "generate": "Generar desde Cero",
+        "upload": "Subir y Actualizar"
+      }
+    },
+    "form": {
+      "name": "Nombre del Restaurante",
+      "namePlaceholder": "Ingresa el nombre de tu restaurante",
+      "type": "Tipo de Restaurante",
+      "typePlaceholder": "ej., Italiano, Chino, Mexicano, Café",
+      "language": "Idioma del Menú",
+      "style": "Estilo del Menú",
+      "ingredients": "Ingredientes Destacados (opcional)",
+      "ingredientsPlaceholder": "ej., trufa, carne wagyu, verduras de temporada",
+      "generate": "Generar Menú",
+      "generating": "Generando..."
+    },
+    "upload": {
+      "title": "Sube tu Menú",
+      "description": "Arrastra y suelta tu archivo de menú aquí, o haz clic para buscar",
+      "formats": "Soporta PDF e imágenes (PNG, JPG) hasta 5MB",
+      "processing": "Procesando tu menú...",
+      "ocrProgress": "Extrayendo texto: {progress}%",
+      "refresh": "Actualizar Menú con IA",
+      "refreshing": "Refinando menú..."
+    },
+    "styles": {
+      "modern": "Moderno",
+      "modernDesc": "Líneas limpias, sensación contemporánea",
+      "vintage": "Vintage",
+      "vintageDesc": "Clásico, calidez nostálgica",
+      "minimal": "Minimalista",
+      "minimalDesc": "Simple, elegante contención"
+    },
+    "languages": {
+      "en": "English",
+      "zh": "中文",
+      "es": "Español"
+    },
+    "preview": {
+      "title": "Vista Previa del Menú",
+      "empty": "Genera o sube un menú para ver la vista previa"
+    },
+    "edit": {
+      "title": "Editar Menú",
+      "addDish": "Añadir Plato",
+      "category": "Categoría",
+      "dishName": "Nombre del Plato",
+      "description": "Descripción",
+      "price": "Precio",
+      "image": "Imagen",
+      "actions": "Acciones",
+      "dragHint": "Arrastra para reordenar"
+    },
+    "export": {
+      "title": "Opciones de Exportación",
+      "pdf": "Descargar PDF",
+      "qrCode": "Generar Código QR",
+      "embed": "Obtener Código de Inserción",
+      "embedCopied": "¡Código de inserción copiado!"
+    }
+  },
+  "errors": {
+    "generic": "Algo salió mal. Por favor intenta de nuevo.",
+    "unauthorized": "Por favor inicia sesión para continuar.",
+    "fileTooLarge": "El archivo es muy grande. Tamaño máximo es 5MB.",
+    "invalidFileType": "Tipo de archivo inválido. Por favor sube un PDF o imagen.",
+    "ocrFailed": "Error al extraer texto de la imagen. Por favor intenta con una imagen más clara.",
+    "generationFailed": "Error al generar el menú. Por favor intenta de nuevo."
+  }
+}
