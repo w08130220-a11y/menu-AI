@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession, isManager, hashPassword } from "@/lib/session";
 import { getActiveStoreId } from "@/lib/store-context";
+import { getSubscription, getUsage, isTierKey, TIERS } from "@/lib/billing";
 
 export async function POST(request: Request) {
   const me = await getSession();
@@ -14,6 +15,17 @@ export async function POST(request: Request) {
   }
   const exists = await prisma.staff.findUnique({ where: { email } });
   if (exists) return NextResponse.json({ error: "Email 已被使用" }, { status: 409 });
+
+  // 訂閱方案員工數上限（主帳號不計）
+  const sub = await getSubscription();
+  const tier = isTierKey(sub.tier) ? TIERS[sub.tier] : TIERS.BASIC;
+  const { staffCount } = await getUsage();
+  if (staffCount >= tier.staffLimit) {
+    return NextResponse.json(
+      { error: `「${tier.label}」方案最多 ${tier.staffLimit} 位員工（目前 ${staffCount} 位），請至「訂閱方案」升級` },
+      { status: 403 }
+    );
+  }
 
   // 新員工歸屬：管理者切換中的分店，未指定時為自己所屬分店
   const activeStoreId = await getActiveStoreId(me);

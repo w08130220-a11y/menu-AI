@@ -1,12 +1,19 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
-import { getSubscription, PLANS, TRIAL_DAYS } from "@/lib/billing";
+import {
+  getSubscription,
+  checkTierFits,
+  isTierKey,
+  TIERS,
+  yearlyPrice,
+  TRIAL_DAYS,
+} from "@/lib/billing";
 import { getStripe, stripePriceId } from "@/lib/stripe";
 
-// 訂閱結帳。
-// - 已設定 Stripe：建立 Checkout Session 並回傳付款頁網址（月繳首次附 7 天試用）
-// - 未設定 Stripe：示範模式，直接開通（試用或正式期間）
+// 訂閱結帳：{ tier: BASIC|PLUS|PRO, cycle: MONTHLY|YEARLY }
+// - 已設定 Stripe：建立 Checkout Session（首次訂閱附 7 天試用）
+// - 未設定 Stripe：示範模式直接開通
 export async function POST(request: Request) {
   const me = await getSession();
   if (!me || me.role !== "ADMIN") {
@@ -14,20 +21,25 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json().catch(() => ({}));
-  if (body.plan !== "MONTHLY" && body.plan !== "YEARLY") {
+  if (!isTierKey(body.tier) || (body.cycle !== "MONTHLY" && body.cycle !== "YEARLY")) {
     return NextResponse.json({ error: "方案錯誤" }, { status: 400 });
   }
-  const plan = body.plan as "MONTHLY" | "YEARLY";
+  const tier = body.tier as import("@/lib/billing").TierKey;
+  const cycle = body.cycle as "MONTHLY" | "YEARLY";
+
+  // 用量不能超過目標方案額度（避免降級後超編）
+  const fitError = await checkTierFits(tier);
+  if (fitError) return NextResponse.json({ error: fitError }, { status: 400 });
 
   const sub = await getSubscription();
   const stripe = getStripe();
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   if (stripe) {
-    const priceId = stripePriceId(plan);
+    const priceId = stripePriceId(tier, cycle);
     if (!priceId) {
       return NextResponse.json(
-        { error: `尚未設定 ${plan === "MONTHLY" ? "STRIPE_PRICE_MONTHLY" : "STRIPE_PRICE_YEARLY"}` },
+        { error: `尚未設定 STRIPE_PRICE_${tier}_${cycle} 環境變數` },
         { status: 500 }
       );
     }
@@ -38,7 +50,7 @@ export async function POST(request: Request) {
         ? { customer: sub.stripeCustomerId }
         : { customer_email: me.email }),
       subscription_data: {
-        metadata: { subscriptionRecordId: sub.id, plan },
+        metadata: { subscriptionRecordId: sub.id, tier, cycle },
         ...(sub.trialUsed ? {} : { trial_period_days: TRIAL_DAYS }),
       },
       success_url: `${appUrl}/billing?success=1`,
@@ -49,13 +61,14 @@ export async function POST(request: Request) {
 
   // ── 示範模式 ──
   const now = Date.now();
-  const periodMs = PLANS[plan].periodDays * 86400000;
+  const periodMs = (cycle === "YEARLY" ? 365 : 30) * 86400000;
   if (!sub.trialUsed) {
     const trialEnd = new Date(now + TRIAL_DAYS * 86400000);
     await prisma.subscription.update({
       where: { id: sub.id },
       data: {
-        plan,
+        tier,
+        plan: cycle,
         status: "TRIALING",
         trialUsed: true,
         trialEndsAt: trialEnd,
@@ -67,10 +80,15 @@ export async function POST(request: Request) {
   await prisma.subscription.update({
     where: { id: sub.id },
     data: {
-      plan,
+      tier,
+      plan: cycle,
       status: "ACTIVE",
       currentPeriodEnd: new Date(now + periodMs),
     },
   });
-  return NextResponse.json({ ok: true, demo: true });
+  return NextResponse.json({
+    ok: true,
+    demo: true,
+    amount: cycle === "YEARLY" ? yearlyPrice(tier) : TIERS[tier].monthly,
+  });
 }

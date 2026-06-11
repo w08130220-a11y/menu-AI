@@ -61,7 +61,8 @@ export async function POST(request: Request) {
       where: { id: record.id },
       data: {
         status: statusMap[s.status] ?? "INACTIVE",
-        plan: (s.metadata?.plan as string) || record.plan,
+        tier: (s.metadata?.tier as string) || record.tier,
+        plan: (s.metadata?.cycle as string) || record.plan,
         stripeSubscriptionId: s.id,
         stripeCustomerId: String(s.customer),
         trialUsed: true,

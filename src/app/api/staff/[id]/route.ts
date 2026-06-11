@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession, isManager, hashPassword } from "@/lib/session";
+import { getSubscription, getUsage, isTierKey, TIERS } from "@/lib/billing";
 
 export async function PATCH(
   request: Request,
@@ -16,6 +17,19 @@ export async function PATCH(
   if (!target) return NextResponse.json({ error: "找不到員工" }, { status: 404 });
   if (target.role === "ADMIN" && me.role !== "ADMIN") {
     return NextResponse.json({ error: "無法修改管理者" }, { status: 403 });
+  }
+
+  // 重新啟用員工時檢查方案員工數上限
+  if (body.active === true && !target.active && target.role !== "ADMIN") {
+    const sub = await getSubscription();
+    const tier = isTierKey(sub.tier) ? TIERS[sub.tier] : TIERS.BASIC;
+    const { staffCount } = await getUsage();
+    if (staffCount >= tier.staffLimit) {
+      return NextResponse.json(
+        { error: `「${tier.label}」方案最多 ${tier.staffLimit} 位員工，請至「訂閱方案」升級後再啟用` },
+        { status: 403 }
+      );
+    }
   }
 
   const updated = await prisma.staff.update({

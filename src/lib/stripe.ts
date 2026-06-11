@@ -7,8 +7,6 @@ export function getStripe(): Stripe | null {
   return new Stripe(key);
 }
 
-export function stripePriceId(plan: "MONTHLY" | "YEARLY") {
-  return plan === "MONTHLY"
-    ? process.env.STRIPE_PRICE_MONTHLY
-    : process.env.STRIPE_PRICE_YEARLY;
+export function stripePriceId(tier: "BASIC" | "PLUS" | "PRO", cycle: "MONTHLY" | "YEARLY") {
+  return process.env[`STRIPE_PRICE_${tier}_${cycle}`];
 }

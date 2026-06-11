@@ -20,9 +20,10 @@ async function main() {
   await prisma.passTemplate.deleteMany();
   await prisma.subscription.deleteMany();
 
-  // 示範訂閱：免費試用中（剩 5 天）
+  // 示範訂閱：專業方案免費試用中（剩 5 天；示範資料有 2 間門市需專業方案）
   await prisma.subscription.create({
     data: {
+      tier: "PRO",
       plan: "MONTHLY",
       status: "TRIALING",
       trialUsed: true,

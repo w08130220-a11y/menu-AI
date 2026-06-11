@@ -132,10 +132,11 @@ model BalanceTransaction {
   createdAt  DateTime @default(now())
 }
 
-// 系統訂閱（整個帳戶一筆）。plan: MONTHLY | YEARLY
+// 系統訂閱（整個帳戶一筆）。tier: BASIC | PLUS | PRO；plan: MONTHLY | YEARLY
 // status: INACTIVE 未訂閱 | TRIALING 試用中 | ACTIVE 訂閱中 | PAST_DUE 扣款失敗 | CANCELED 已取消
 model Subscription {
   id                   String    @id @default(cuid())
+  tier                 String    @default("BASIC")
   plan                 String    @default("MONTHLY")
   status               String    @default("INACTIVE")
   trialUsed            Boolean   @default(false)

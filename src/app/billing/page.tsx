@@ -1,36 +1,35 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Sparkles, Check, ArrowLeft, BadgeCheck, AlertTriangle } from "lucide-react";
+import { Sparkles, ArrowLeft, AlertTriangle } from "lucide-react";
 import { getSession } from "@/lib/session";
-import { getSubscription, PLANS, isLocked } from "@/lib/billing";
-import { fmtMoney } from "@/lib/constants";
-import { SubscribeButton, CancelButton } from "./billing-client";
+import {
+  getSubscription,
+  getUsage,
+  isLocked,
+  isTierKey,
+  TIERS,
+  yearlyPrice,
+} from "@/lib/billing";
+import { PlanCards, CancelButton } from "./billing-client";
 
 export const metadata = { title: "訂閱方案" };
 export const dynamic = "force-dynamic";
-
-const FEATURES = [
-  "線上預約 + 簡訊通知",
-  "POS 收款與儲值金",
-  "排班、打卡與薪資計算",
-  "顧客 CRM、療程券、施作照片",
-  "多分店與跨店報表",
-  "員工頁籤權限管理",
-];
 
 export default async function BillingPage() {
   const me = await getSession();
   if (!me) redirect("/login");
 
-  const sub = await getSubscription();
+  const [sub, usage] = await Promise.all([getSubscription(), getUsage()]);
   const isAdmin = me.role === "ADMIN";
   const stripeConfigured = !!process.env.STRIPE_SECRET_KEY;
   const locked = isLocked(sub);
+  const tierLabel = isTierKey(sub.tier) ? TIERS[sub.tier].label : sub.tier;
+  const tierInfo = isTierKey(sub.tier) ? TIERS[sub.tier] : null;
 
   const statusBadge = {
-    TRIALING: { text: `免費試用中・剩 ${sub.daysLeft} 天`, cls: "bg-sky-100 text-sky-700" },
+    TRIALING: { text: `${tierLabel}方案・免費試用中，剩 ${sub.daysLeft} 天`, cls: "bg-sky-100 text-sky-700" },
     ACTIVE: {
-      text: `訂閱有效・${sub.currentPeriodEnd?.toLocaleDateString("zh-TW")} 到期${sub.status === "CANCELED" ? "（已排定取消）" : ""}`,
+      text: `${tierLabel}方案・${sub.plan === "YEARLY" ? "年繳" : "月繳"}・${sub.currentPeriodEnd?.toLocaleDateString("zh-TW")} 到期${sub.status === "CANCELED" ? "（已排定取消）" : ""}`,
       cls: "bg-emerald-100 text-emerald-700",
     },
     PAST_DUE: { text: "扣款失敗，請更新付款方式", cls: "bg-amber-100 text-amber-700" },
@@ -41,7 +40,7 @@ export default async function BillingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-50 to-background">
       <header className="border-b bg-card/60 backdrop-blur">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
+        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-2 text-primary">
             <Sparkles className="h-6 w-6" />
             <span className="text-xl font-bold">BeauHub</span>
@@ -54,12 +53,17 @@ export default async function BillingPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 py-10">
+      <main className="mx-auto max-w-4xl px-4 py-10">
         <h1 className="text-center text-2xl font-bold mb-2">訂閱方案</h1>
-        <div className="flex justify-center mb-8">
+        <div className="flex flex-col items-center gap-1.5 mb-8">
           <span className={`rounded-full px-3 py-1 text-sm font-medium ${statusBadge.cls}`}>
             {statusBadge.text}
           </span>
+          {tierInfo && !locked && (
+            <span className="text-xs text-muted-foreground">
+              目前用量：員工 {usage.staffCount} / {tierInfo.staffLimit} 位・門市 {usage.storeCount} / {tierInfo.storeLimit} 間
+            </span>
+          )}
         </div>
 
         {locked && (
@@ -73,61 +77,25 @@ export default async function BillingPage() {
 
         {isAdmin ? (
           <>
-            <div className="grid gap-5 sm:grid-cols-2">
-              {/* 月繳 */}
-              <div className="rounded-2xl border bg-card p-6 flex flex-col">
-                <h2 className="font-bold">{PLANS.MONTHLY.label}</h2>
-                <p className="mt-3">
-                  <span className="text-3xl font-bold">{fmtMoney(PLANS.MONTHLY.price)}</span>
-                  <span className="text-muted-foreground text-sm"> / 月</span>
-                </p>
-                <p className="mt-1 text-sm text-sky-600 font-medium">
-                  {!sub.trialUsed ? "首次訂閱免費試用 7 天" : "　"}
-                </p>
-                <ul className="mt-4 mb-6 space-y-2 text-sm flex-1">
-                  {FEATURES.map((f) => (
-                    <li key={f} className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-emerald-500 shrink-0" /> {f}
-                    </li>
-                  ))}
-                </ul>
-                <SubscribeButton
-                  plan="MONTHLY"
-                  label={!sub.trialUsed ? "開始 7 天免費試用" : "訂閱月繳方案"}
-                />
-              </div>
-
-              {/* 年繳 */}
-              <div className="relative rounded-2xl border-2 border-primary bg-card p-6 flex flex-col">
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-xs font-bold text-white">
-                  最划算・8 折
-                </span>
-                <h2 className="font-bold">{PLANS.YEARLY.label}</h2>
-                <p className="mt-3">
-                  <span className="text-3xl font-bold">{fmtMoney(PLANS.YEARLY.price)}</span>
-                  <span className="text-muted-foreground text-sm"> / 年</span>
-                </p>
-                <p className="mt-1 text-sm text-primary font-medium">{PLANS.YEARLY.note}</p>
-                <ul className="mt-4 mb-6 space-y-2 text-sm flex-1">
-                  {FEATURES.map((f) => (
-                    <li key={f} className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-emerald-500 shrink-0" /> {f}
-                    </li>
-                  ))}
-                  <li className="flex items-center gap-2 font-medium">
-                    <BadgeCheck className="h-4 w-4 text-primary shrink-0" />
-                    一次付清，整年不漲價
-                  </li>
-                </ul>
-                <SubscribeButton plan="YEARLY" label="訂閱年繳方案" highlight />
-              </div>
-            </div>
-
+            <PlanCards
+              tiers={(Object.keys(TIERS) as (keyof typeof TIERS)[]).map((k) => ({
+                key: k,
+                label: TIERS[k].label,
+                monthly: TIERS[k].monthly,
+                yearly: yearlyPrice(k),
+                staffLimit: TIERS[k].staffLimit,
+                storeLimit: TIERS[k].storeLimit,
+              }))}
+              currentTier={sub.tier}
+              trialUsed={sub.trialUsed}
+              isActive={sub.effective === "ACTIVE" || sub.effective === "TRIALING"}
+              contactEmail={me.email}
+            />
             <div className="mt-6 flex items-center justify-between">
               <p className="text-xs text-muted-foreground">
                 {stripeConfigured
                   ? "付款由 Stripe 安全處理，卡號不經過本系統。"
-                  : "目前為示範模式：點擊訂閱會直接開通。設定 STRIPE_SECRET_KEY 與價格 ID 後即切換為 Stripe 付款。"}
+                  : "目前為示範模式：點擊訂閱會直接開通。設定 Stripe 金鑰與價格 ID 後即切換為線上付款。"}
               </p>
               {(sub.effective === "ACTIVE" || sub.effective === "TRIALING") &&
                 sub.status !== "CANCELED" && <CancelButton />}
