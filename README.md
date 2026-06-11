@@ -1,193 +1,85 @@
-# AI Menu Generator SaaS
+# BeauHub 美容業 SaaS 管理系統
 
-A complete AI-powered menu generator built with Next.js 15, Tailwind CSS, Shadcn/ui, and PostgreSQL. Create stunning restaurant menus in seconds - either generate from scratch or upload existing menus for AI-powered transformation.
+美髮・美甲美睫・按摩 SPA・臉部護理一站式雲端管理平台（Web 版）。
 
-## Features
+## 功能總覽
 
-- 🤖 **AI-Powered Generation**: Create complete menus using GPT-4o-mini
-- 📤 **Upload & Transform**: Upload PDF/images, extract text with OCR, and AI-refine
-- 🎨 **Multiple Styles**: Modern, Vintage, and Minimal themes
-- 🌍 **Multi-language**: English, Chinese, and Spanish support
-- 📱 **QR Code Generation**: Share menus via QR codes
-- 📄 **PDF Export**: Download professional PDF menus
-- 💳 **Subscription**: Stripe integration for $9/month unlimited plan
-- 🔐 **Authentication**: Google OAuth via NextAuth.js
+### 日常營運
+- **公司儀表板**：今日/本月營收、預約數、出勤狀況、近 14 天營收趨勢、付款方式占比、員工業績排行、低庫存警示
+- **預約管理**：每日預約清單、狀態流轉（待確認 → 已確認 → 完成/取消/未到）、後台代客新增預約、同人員時段衝突檢查
+- **線上預約（顧客端）**：免註冊，選服務 → 選人員 → 選日期時段（自動依排班與既有預約計算空檔）→ 填手機姓名完成；手機號碼自動比對建檔顧客
+- **POS 收款**：點選服務/產品加入結帳、每筆明細可指定業績歸屬人、折扣、現金/刷卡/轉帳/儲值金付款、自動扣庫存與儲值金、今日結帳紀錄
 
-## Tech Stack
+### 團隊管理
+- **上下班打卡**：一鍵打卡（自動判斷上班/下班）、個人近 7 天紀錄、管理者檢視全店出勤
+- **員工排班**：週曆檢視、店長點擊格子即可切換班別（全班/早班/晚班/休假）、排班同步影響線上預約可選時段
+- **薪資計算**：支援兩種制度——「月底薪＋業績抽成」與「時薪制（依打卡時數）」，每人可個別設定抽成比例，按月自動試算
+- **業績紀錄**：個人服務業績與產品販售明細、月份/員工篩選
+- **員工管理**：帳號建立、角色權限（管理者/店長/員工）、薪資制度設定、停用帳號
 
-- **Frontend**: Next.js 15 (App Router), React 19, Tailwind CSS, Shadcn/ui
-- **Backend**: Next.js API Routes
-- **Database**: PostgreSQL + Prisma ORM
-- **AI**: OpenAI GPT-4o-mini
-- **OCR**: Tesseract.js (client-side)
-- **Auth**: NextAuth.js v5
-- **Payments**: Stripe
-- **Other**: React Hook Form, Zod, TanStack Query, jsPDF, qrcode.react
+### 顧客經營
+- **顧客資料（CRM）**：建檔、標籤、注意事項（過敏/偏好）、消費與預約歷史
+- **會員儲值金**：加值、POS 結帳折抵
+- **療程券/堂數券**：開立（例：護膚 10 堂）、逐堂核銷、效期管理
 
-## Getting Started
+### 店務設定
+- **服務項目價目管理**：增改價格/時長/上下架，同步至線上預約與 POS
+- **產品庫存管理**：進貨/盤點調整、銷售自動扣庫存、低庫存警示
 
-### Prerequisites
+## 技術架構
 
-- Node.js 18+
-- Docker (for PostgreSQL)
-- OpenAI API key
-- Google OAuth credentials
-- Stripe account (for payments)
+- **框架**：Next.js 15（App Router）+ React 19 + TypeScript
+- **UI**：Tailwind CSS + shadcn/ui + lucide-react
+- **資料庫**：Prisma ORM；開發環境 SQLite（零安裝），正式環境可改 PostgreSQL
+- **認證**：自建 HMAC 簽章 Session Cookie（員工帳密登入）
+- **多分店**：資料模型已預留 Store 分店結構，可平滑擴充
 
-### 1. Clone and Install
-
-```bash
-git clone <repo>
-cd ai-menu-generator
-npm install
-```
-
-### 2. Set up Environment Variables
+## 快速開始
 
 ```bash
-cp .env.example .env
+npm install            # 安裝套件（自動 prisma generate）
+cp .env.example .env   # 設定環境變數（預設即可跑）
+npm run db:push        # 建立資料庫
+npm run db:seed        # 寫入示範資料
+npm run dev            # http://localhost:3000
 ```
 
-Edit `.env` with your credentials:
+### 示範帳號
 
-```env
-# Database
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/menu_generator?schema=public"
+| 角色 | 帳號 | 密碼 |
+|------|------|------|
+| 管理者（店長） | admin@beauhub.tw | admin123 |
+| 員工（設計師） | siyu@beauhub.tw | staff123 |
 
-# NextAuth
-AUTH_SECRET="generate-with-openssl-rand-base64-32"
-AUTH_URL="http://localhost:3000"
+- 管理後台：`/login` 登入後進入 `/dashboard`
+- 顧客線上預約：`/booking`（免登入）
 
-# Google OAuth
-AUTH_GOOGLE_ID="your-google-client-id"
-AUTH_GOOGLE_SECRET="your-google-client-secret"
+## 主要頁面
 
-# OpenAI
-OPENAI_API_KEY="sk-your-openai-api-key"
+| 路徑 | 說明 | 權限 |
+|------|------|------|
+| `/dashboard` | 公司儀表板 | 全員 |
+| `/appointments` | 每日預約管理 | 全員 |
+| `/pos` | POS 收款 | 全員 |
+| `/clock` | 上下班打卡 | 全員 |
+| `/schedule` | 員工排班 | 檢視全員；編輯限店長 |
+| `/payroll` | 薪資計算 | 員工看自己；店長看全店 |
+| `/performance` | 業績紀錄 | 員工看自己；店長看全店 |
+| `/customers` | 顧客管理 | 全員 |
+| `/services` | 服務項目 | 店長 |
+| `/inventory` | 產品庫存 | 店長 |
+| `/staff` | 員工管理 | 店長 |
+| `/booking` | 顧客線上預約 | 公開 |
 
-# Stripe
-STRIPE_SECRET_KEY="sk_test_..."
-STRIPE_WEBHOOK_SECRET="whsec_..."
-STRIPE_PRICE_ID="price_..."
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
+## 正式環境部署
 
-# App
-NEXT_PUBLIC_APP_URL="http://localhost:3000"
-```
+1. 將 `prisma/schema.prisma` 的 `provider` 改為 `postgresql`，`DATABASE_URL` 指向正式資料庫
+2. 設定強隨機 `AUTH_SECRET`
+3. `npm run build && npm start`，或部署至 Vercel（資料庫建議 Supabase / Neon）
 
-### 3. Start PostgreSQL
+## 後續擴充方向（已預留架構）
 
-```bash
-docker-compose up -d
-```
-
-### 4. Initialize Database
-
-```bash
-npm run db:push
-```
-
-### 5. Run Development Server
-
-```bash
-npm run dev
-```
-
-Visit [http://localhost:3000](http://localhost:3000)
-
-## Project Structure
-
-```
-src/
-├── app/
-│   ├── (dashboard)/           # Protected routes
-│   │   ├── dashboard/         # User dashboard
-│   │   └── menu/
-│   │       ├── new/           # Create menu (Generate/Upload)
-│   │       └── [id]/edit/     # Edit menu
-│   ├── api/
-│   │   ├── auth/              # NextAuth
-│   │   ├── menu/              # Menu CRUD
-│   │   ├── stripe/            # Stripe checkout
-│   │   ├── upload-refresh/    # OCR + AI processing
-│   │   └── webhooks/          # Stripe webhooks
-│   ├── auth/signin/           # Sign in page
-│   ├── m/[id]/                # Public menu view
-│   └── page.tsx               # Landing page
-├── components/
-│   ├── layout/                # Navbar, UserNav
-│   ├── menu/                  # Menu-specific components
-│   └── ui/                    # Shadcn components
-├── hooks/
-│   └── use-toast.ts
-├── i18n/
-│   ├── messages/              # EN, ZH, ES translations
-│   └── request.ts
-├── lib/
-│   ├── auth.ts                # NextAuth config
-│   ├── openai.ts              # AI generation
-│   ├── prisma.ts              # Database client
-│   ├── stripe.ts              # Stripe utilities
-│   └── utils.ts
-└── types/
-    └── index.ts
-```
-
-## Key Features Explained
-
-### Menu Generation
-1. User enters restaurant name, type, language, and optional ingredients
-2. AI generates 12-15 dishes with names, descriptions, prices, and categories
-3. Menu is saved to database and user redirected to editor
-
-### Upload & Transform
-1. User uploads PDF/image of existing menu
-2. Tesseract.js extracts text via OCR (client-side)
-3. AI parses and refines the extracted text
-4. Creates improved descriptions, standardizes prices, categorizes dishes
-5. Translates to selected language if needed
-
-### Style Templates
-- **Modern**: Clean, contemporary design with orange accents
-- **Vintage**: Warm amber tones with serif typography
-- **Minimal**: Ultra-simple with lots of whitespace
-
-### Export Options
-- **PDF Download**: Professional menu PDF
-- **QR Code**: Shareable QR linking to public menu page
-- **Embed Code**: iframe code for website embedding
-
-## API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/menu` | GET | List user's menus |
-| `/api/menu/generate` | POST | Generate new menu with AI |
-| `/api/menu/[id]` | GET/PUT/DELETE | Single menu operations |
-| `/api/upload-refresh` | POST | Process uploaded menu |
-| `/api/stripe/checkout` | POST | Create Stripe checkout |
-| `/api/webhooks/stripe` | POST | Stripe webhook handler |
-
-## Stripe Setup
-
-1. Create a product and price in Stripe Dashboard
-2. Set up webhook endpoint: `https://your-domain.com/api/webhooks/stripe`
-3. Enable events: `checkout.session.completed`, `invoice.payment_succeeded`, `customer.subscription.*`
-4. Add credentials to `.env`
-
-## Deployment
-
-### Vercel (Recommended)
-
-1. Push to GitHub
-2. Import to Vercel
-3. Add environment variables
-4. Deploy
-
-### Database (Recommended: Supabase or Neon)
-
-Update `DATABASE_URL` to your production PostgreSQL URL.
-
-## License
-
-MIT
+- 多分店切換與跨店報表（Store 模型已就緒）
+- 預約簡訊 / LINE 通知提醒
+- 顧客評價回饋與行銷推播
+- 線上付款（信用卡訂金）

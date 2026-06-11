@@ -3,98 +3,176 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
+// 分店
+model Store {
+  id        String  @id @default(cuid())
+  name      String
+  phone     String?
+  address   String?
+  openTime  String  @default("10:00")
+  closeTime String  @default("20:00")
+  staff     Staff[]
 }
 
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+// 員工（含管理者）。role: ADMIN | MANAGER | STAFF
+model Staff {
+  id                String        @id @default(cuid())
+  storeId           String
+  store             Store         @relation(fields: [storeId], references: [id])
+  name              String
+  email             String        @unique
+  password          String // sha256 hex
+  role              String        @default("STAFF")
+  title             String? // 職稱：髮型設計師 / 美甲師 / 美睫師 / 芳療師 / 美容師
+  phone             String?
+  payType           String        @default("MONTHLY") // MONTHLY 底薪+抽成 | HOURLY 時薪制
+  baseSalary        Int           @default(0) // 月底薪（MONTHLY）
+  hourlyRate        Int           @default(0) // 時薪（HOURLY）
+  serviceCommission Float         @default(0.1) // 服務業績抽成
+  productCommission Float         @default(0.05) // 產品銷售抽成
+  color             String        @default("#f97316") // 排班 / 行事曆顯示色
+  active            Boolean       @default(true)
+  createdAt         DateTime      @default(now())
+  timeRecords       TimeRecord[]
+  shifts            Shift[]
+  appointments      Appointment[]
+  saleItems         SaleItem[]
+  salesAsCashier    Sale[]        @relation("cashier")
 }
 
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  accounts      Account[]
-  sessions      Session[]
-  menus         Menu[]
-  
-  // Subscription
-  stripeCustomerId       String?   @unique
-  stripeSubscriptionId   String?   @unique
-  stripePriceId          String?
-  stripeCurrentPeriodEnd DateTime?
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// 打卡紀錄
+model TimeRecord {
+  id       String    @id @default(cuid())
+  staffId  String
+  staff    Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  workDate String // YYYY-MM-DD
+  clockIn  DateTime
+  clockOut DateTime?
+  note     String?
+
+  @@index([staffId, workDate])
 }
 
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
+// 排班。shiftType: MORNING | EVENING | FULL | OFF
+model Shift {
+  id        String @id @default(cuid())
+  staffId   String
+  staff     Staff  @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  workDate  String // YYYY-MM-DD
+  shiftType String @default("FULL")
+  startTime String @default("10:00")
+  endTime   String @default("20:00")
 
-  @@unique([identifier, token])
+  @@unique([staffId, workDate])
 }
 
-model Menu {
-  id           String   @id @default(cuid())
-  userId       String
+// 顧客資料
+model Customer {
+  id           String         @id @default(cuid())
   name         String
-  type         String   // e.g., "italian", "chinese", "mexican"
-  language     String   // "en", "zh", "es"
-  style        String?  // "modern", "vintage", "minimal"
-  originalFile String?  // URL of uploaded file (S3/Supabase)
-  qrUrl        String?
-  
-  dishes       Dish[]
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  
-  @@index([userId])
+  phone        String         @unique
+  email        String?
+  gender       String? // F | M | OTHER
+  birthday     String? // YYYY-MM-DD
+  note         String? // 過敏注意、偏好設計師、髮況等
+  tags         String? // 逗號分隔：VIP,染燙客,敏感肌
+  balance      Int            @default(0) // 儲值金餘額
+  createdAt    DateTime       @default(now())
+  appointments Appointment[]
+  sales        Sale[]
+  passes       CustomerPass[]
 }
 
-model Dish {
-  id          String  @id @default(cuid())
-  menuId      String
-  name        String
-  description String?
-  price       Float
-  category    String
-  imageUrl    String?
-  position    Int     @default(0)
-  
-  menu        Menu    @relation(fields: [menuId], references: [id], onDelete: Cascade)
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  @@index([menuId])
+// 療程券 / 堂數券（例：臉部護理 10 堂）
+model CustomerPass {
+  id            String    @id @default(cuid())
+  customerId    String
+  customer      Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  name          String
+  totalSessions Int
+  usedSessions  Int       @default(0)
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+}
+
+// 服務項目。category: HAIR | NAIL | LASH | SPA | FACIAL
+model Service {
+  id           String        @id @default(cuid())
+  name         String
+  category     String
+  price        Int
+  durationMin  Int           @default(60)
+  description  String?
+  active       Boolean       @default(true)
+  appointments Appointment[]
+}
+
+// 販售產品（含庫存）
+model Product {
+  id         String  @id @default(cuid())
+  name       String
+  category   String?
+  price      Int
+  cost       Int     @default(0)
+  stock      Int     @default(0)
+  lowStockAt Int     @default(5) // 低庫存警示門檻
+  active     Boolean @default(true)
+}
+
+// 預約。status: PENDING | CONFIRMED | COMPLETED | CANCELLED | NO_SHOW
+// source: ONLINE | PHONE | WALK_IN
+model Appointment {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  staffId    String
+  staff      Staff    @relation(fields: [staffId], references: [id])
+  serviceId  String
+  service    Service  @relation(fields: [serviceId], references: [id])
+  date       String // YYYY-MM-DD
+  startAt    DateTime
+  endAt      DateTime
+  status     String   @default("PENDING")
+  source     String   @default("WALK_IN")
+  note       String?
+  createdAt  DateTime @default(now())
+
+  @@index([date])
+  @@index([staffId, date])
+}
+
+// POS 結帳單。paymentMethod: CASH | CARD | TRANSFER | BALANCE
+model Sale {
+  id            String     @id @default(cuid())
+  customerId    String?
+  customer      Customer?  @relation(fields: [customerId], references: [id])
+  cashierId     String
+  cashier       Staff      @relation("cashier", fields: [cashierId], references: [id])
+  subtotal      Int
+  discount      Int        @default(0)
+  total         Int
+  paymentMethod String     @default("CASH")
+  note          String?
+  createdAt     DateTime   @default(now())
+  items         SaleItem[]
+}
+
+// 結帳明細（staffId = 業績歸屬人）。itemType: SERVICE | PRODUCT
+model SaleItem {
+  id        String  @id @default(cuid())
+  saleId    String
+  sale      Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  staffId   String
+  staff     Staff   @relation(fields: [staffId], references: [id])
+  itemType  String
+  serviceId String?
+  productId String?
+  name      String
+  unitPrice Int
+  qty       Int     @default(1)
+  subtotal  Int
 }
