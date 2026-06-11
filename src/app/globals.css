@@ -2,55 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
+/* BeautyTime 品牌色系：墨綠 × 香檳金，編輯感、高級沙龍風 */
 @layer base {
   :root {
-    --background: 30 20% 98%;
-    --foreground: 30 10% 10%;
-    --card: 30 20% 100%;
-    --card-foreground: 30 10% 10%;
-    --popover: 30 20% 100%;
-    --popover-foreground: 30 10% 10%;
-    --primary: 24 100% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 30 15% 92%;
-    --secondary-foreground: 30 10% 20%;
-    --muted: 30 15% 95%;
-    --muted-foreground: 30 10% 45%;
-    --accent: 142 70% 45%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
+    --background: 160 25% 98%;
+    --foreground: 172 40% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 172 40% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 172 40% 10%;
+    --primary: 168 58% 18%;
+    --primary-foreground: 160 30% 98%;
+    --secondary: 162 18% 93%;
+    --secondary-foreground: 170 35% 16%;
+    --muted: 160 16% 94%;
+    --muted-foreground: 168 12% 42%;
+    --accent: 42 62% 48%;
+    --accent-foreground: 172 40% 10%;
+    --destructive: 0 72% 48%;
     --destructive-foreground: 0 0% 100%;
-    --border: 30 15% 88%;
-    --input: 30 15% 88%;
-    --ring: 24 100% 50%;
-    --radius: 0.75rem;
-    --chart-1: 24 100% 50%;
-    --chart-2: 142 70% 45%;
-    --chart-3: 200 80% 50%;
-    --chart-4: 280 70% 55%;
-    --chart-5: 45 95% 55%;
+    --border: 162 14% 88%;
+    --input: 162 14% 86%;
+    --ring: 168 58% 24%;
+    --radius: 0.625rem;
+    --chart-1: 168 58% 28%;
+    --chart-2: 42 62% 48%;
+    --chart-3: 196 64% 38%;
+    --chart-4: 330 45% 48%;
+    --chart-5: 168 25% 55%;
+
+    /* 深色側邊欄 / 形象區塊 */
+    --ink: 172 45% 8%;
+    --ink-soft: 170 32% 13%;
+    --gold: 42 62% 55%;
   }
 
   .dark {
-    --background: 30 10% 8%;
-    --foreground: 30 10% 95%;
-    --card: 30 10% 12%;
-    --card-foreground: 30 10% 95%;
-    --popover: 30 10% 12%;
-    --popover-foreground: 30 10% 95%;
-    --primary: 24 100% 55%;
+    --background: 172 40% 7%;
+    --foreground: 160 20% 95%;
+    --card: 172 35% 10%;
+    --card-foreground: 160 20% 95%;
+    --popover: 172 35% 10%;
+    --popover-foreground: 160 20% 95%;
+    --primary: 168 45% 40%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 30 10% 18%;
-    --secondary-foreground: 30 10% 90%;
-    --muted: 30 10% 20%;
-    --muted-foreground: 30 10% 60%;
-    --accent: 142 70% 50%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 55%;
+    --secondary: 170 25% 16%;
+    --secondary-foreground: 160 20% 90%;
+    --muted: 170 22% 18%;
+    --muted-foreground: 165 12% 60%;
+    --accent: 42 62% 52%;
+    --accent-foreground: 172 40% 10%;
+    --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 30 10% 20%;
-    --input: 30 10% 20%;
-    --ring: 24 100% 55%;
+    --border: 170 22% 20%;
+    --input: 170 22% 20%;
+    --ring: 168 45% 40%;
   }
 }
 
@@ -62,51 +68,57 @@
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+  h1 {
+    letter-spacing: -0.01em;
+  }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
-  
+
+  /* 品牌字標與大標題用襯線字 */
+  .font-brand {
+    font-family: var(--font-serif), serif;
+    letter-spacing: 0.02em;
+  }
+
+  .bg-ink {
+    background-color: hsl(var(--ink));
+  }
+  .bg-ink-soft {
+    background-color: hsl(var(--ink-soft));
+  }
+  .text-gold {
+    color: hsl(var(--gold));
+  }
+  .bg-gold {
+    background-color: hsl(var(--gold));
+  }
+  .border-gold {
+    border-color: hsl(var(--gold));
+  }
+
+  /* 深色區塊上的細緻紋理 */
+  .ink-texture {
+    background-image:
+      radial-gradient(ellipse 80% 60% at 70% -10%, hsl(168 40% 22% / 0.55), transparent),
+      radial-gradient(ellipse 50% 40% at 10% 110%, hsl(42 50% 35% / 0.18), transparent);
+  }
+
   .animate-in {
     animation: fade-in 0.5s ease-out forwards;
   }
-  
   .delay-100 {
     animation-delay: 100ms;
   }
-  
   .delay-200 {
     animation-delay: 200ms;
   }
-  
   .delay-300 {
     animation-delay: 300ms;
   }
-}
-
-/* Menu Style Themes */
-.menu-modern {
-  --menu-bg: 0 0% 100%;
-  --menu-text: 0 0% 10%;
-  --menu-accent: 24 100% 50%;
-  font-family: var(--font-sans);
-}
-
-.menu-vintage {
-  --menu-bg: 40 30% 96%;
-  --menu-text: 30 20% 20%;
-  --menu-accent: 15 70% 40%;
-  font-family: var(--font-serif);
-}
-
-.menu-minimal {
-  --menu-bg: 0 0% 100%;
-  --menu-text: 0 0% 5%;
-  --menu-accent: 0 0% 30%;
-  font-family: var(--font-sans);
-  letter-spacing: 0.05em;
 }
 
 /* Smooth page transitions */

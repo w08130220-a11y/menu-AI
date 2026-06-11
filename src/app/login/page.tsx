@@ -40,9 +40,11 @@ function LoginForm() {
   return (
     <Card className="w-full max-w-md shadow-lg">
       <CardHeader className="text-center">
-        <Link href="/" className="flex items-center justify-center gap-2 text-primary mb-2">
-          <Sparkles className="h-7 w-7" />
-          <span className="text-2xl font-bold">BeauHub</span>
+        <Link href="/" className="flex items-center justify-center gap-2 mb-2">
+          <Sparkles className="h-6 w-6 text-accent" />
+          <span className="font-brand text-2xl font-bold text-primary">
+            Beauty<span className="text-accent">Time</span>
+          </span>
         </Link>
         <CardTitle>員工 / 管理者登入</CardTitle>
         <CardDescription>使用公司配發的帳號登入管理後台</CardDescription>
@@ -54,7 +56,7 @@ function LoginForm() {
             <Input
               id="email"
               type="email"
-              placeholder="you@beauhub.tw"
+              placeholder="you@beautytime.tw"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -77,8 +79,8 @@ function LoginForm() {
         </form>
         <div className="mt-6 rounded-md bg-muted p-3 text-xs text-muted-foreground space-y-1">
           <p className="font-medium text-foreground">示範帳號</p>
-          <p>管理者：admin@beauhub.tw / admin123</p>
-          <p>員工：siyu@beauhub.tw / staff123</p>
+          <p>管理者：admin@beautytime.tw / admin123</p>
+          <p>員工：siyu@beautytime.tw / staff123</p>
         </div>
       </CardContent>
     </Card>
@@ -87,7 +89,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-orange-50 to-background px-4">
+    <div className="min-h-screen flex items-center justify-center bg-ink ink-texture px-4">
       <Suspense>
         <LoginForm />
       </Suspense>

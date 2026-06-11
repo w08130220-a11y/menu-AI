@@ -22,11 +22,13 @@ export default async function PayPage({ params }: { params: Promise<{ id: string
   const paid = appointment.depositStatus === "PAID";
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-background">
-      <header className="border-b bg-card/60 backdrop-blur">
-        <div className="mx-auto flex max-w-md items-center gap-2 px-4 py-4 text-primary">
-          <Sparkles className="h-6 w-6" />
-          <span className="text-xl font-bold">BeauHub</span>
+    <div className="min-h-screen bg-background">
+      <header className="bg-ink ink-texture">
+        <div className="mx-auto flex max-w-md items-center gap-2 px-4 py-4">
+          <Sparkles className="h-5 w-5 text-gold" />
+          <span className="font-brand text-xl font-bold text-white">
+            Beauty<span className="text-gold">Time</span>
+          </span>
         </div>
       </header>
       <main className="mx-auto max-w-md px-4 py-10">

@@ -22,7 +22,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // 訂閱到期 → 鎖定後台
   if (isLocked(subscription)) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-orange-50 to-background px-4 text-center">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4 text-center">
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
           <Lock className="h-8 w-8 text-red-500" />
         </div>

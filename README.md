@@ -1,4 +1,4 @@
-# BeauHub 美容業 SaaS 管理系統
+# BeautyTime 美容業 SaaS 管理系統
 
 美髮・美甲美睫・按摩 SPA・臉部護理一站式雲端管理平台（Web 版）。
 
@@ -59,9 +59,9 @@ npm run dev            # http://localhost:3000
 
 | 角色 | 帳號 | 密碼 |
 |------|------|------|
-| 管理者（可切換分店） | admin@beauhub.tw | admin123 |
-| 信義店店長 | kuanting@beauhub.tw | manager123 |
-| 員工（設計師） | siyu@beauhub.tw | staff123 |
+| 管理者（可切換分店） | admin@beautytime.tw | admin123 |
+| 信義店店長 | kuanting@beautytime.tw | manager123 |
+| 員工（設計師） | siyu@beautytime.tw | staff123 |
 
 - 管理後台：`/login` 登入後進入 `/dashboard`
 - 顧客線上預約：`/booking`（免登入）

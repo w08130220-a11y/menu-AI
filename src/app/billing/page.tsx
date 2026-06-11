@@ -38,15 +38,17 @@ export default async function BillingPage() {
   }[sub.effective];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-background">
-      <header className="border-b bg-card/60 backdrop-blur">
+    <div className="min-h-screen bg-background">
+      <header className="bg-ink ink-texture">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-2 text-primary">
-            <Sparkles className="h-6 w-6" />
-            <span className="text-xl font-bold">BeauHub</span>
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-gold" />
+            <span className="font-brand text-xl font-bold text-white">
+              Beauty<span className="text-gold">Time</span>
+            </span>
           </div>
           {!locked && (
-            <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+            <Link href="/dashboard" className="text-sm text-white/60 hover:text-white inline-flex items-center gap-1">
               <ArrowLeft className="h-3.5 w-3.5" /> 回管理後台
             </Link>
           )}
@@ -54,7 +56,7 @@ export default async function BillingPage() {
       </header>
 
       <main className="mx-auto max-w-4xl px-4 py-10">
-        <h1 className="text-center text-2xl font-bold mb-2">訂閱方案</h1>
+        <h1 className="font-brand text-center text-3xl font-bold mb-2">訂閱方案</h1>
         <div className="flex flex-col items-center gap-1.5 mb-8">
           <span className={`rounded-full px-3 py-1 text-sm font-medium ${statusBadge.cls}`}>
             {statusBadge.text}

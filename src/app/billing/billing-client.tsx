@@ -185,7 +185,7 @@ export function PlanCards({
           </p>
         </div>
         <Button asChild variant="outline">
-          <a href={`mailto:${contactEmail}?subject=BeauHub 企業方案洽詢`}>聯絡我們</a>
+          <a href={`mailto:${contactEmail}?subject=BeautyTime 企業方案洽詢`}>聯絡我們</a>
         </Button>
       </div>
     </div>

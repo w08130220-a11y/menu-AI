@@ -45,28 +45,28 @@ async function main() {
 
   const store1 = await prisma.store.create({
     data: {
-      name: "BeauHub 大安旗艦店",
+      name: "BeautyTime 大安旗艦店",
       phone: "02-2345-6789",
       address: "台北市大安區忠孝東路四段 100 號 2 樓",
     },
   });
   const store2 = await prisma.store.create({
     data: {
-      name: "BeauHub 信義門市",
+      name: "BeautyTime 信義門市",
       phone: "02-8780-1234",
       address: "台北市信義區松壽路 12 號 3 樓",
     },
   });
 
   const staffData = [
-    { storeId: store1.id, name: "王雅婷", email: "admin@beauhub.tw", password: "admin123", role: "ADMIN", title: "品牌總監", baseSalary: 45000, serviceCommission: 0.15, productCommission: 0.08, color: "#f97316" },
-    { storeId: store1.id, name: "陳思好", email: "siyu@beauhub.tw", password: "staff123", role: "STAFF", title: "髮型設計師", baseSalary: 30000, serviceCommission: 0.12, productCommission: 0.05, color: "#10b981" },
-    { storeId: store1.id, name: "林佳穎", email: "jiaying@beauhub.tw", password: "staff123", role: "STAFF", title: "美甲 / 美睫師", baseSalary: 28000, serviceCommission: 0.12, productCommission: 0.05, color: "#3b82f6" },
-    { storeId: store1.id, name: "張惠如", email: "huiru@beauhub.tw", password: "staff123", role: "STAFF", title: "芳療按摩師", baseSalary: 28000, serviceCommission: 0.1, productCommission: 0.05, color: "#a855f7" },
-    { storeId: store1.id, name: "李美慧", email: "meihui@beauhub.tw", password: "staff123", role: "STAFF", title: "美容師", payType: "HOURLY", baseSalary: 0, hourlyRate: 220, serviceCommission: 0.1, productCommission: 0.05, color: "#ec4899" },
-    { storeId: store2.id, name: "周冠廷", email: "kuanting@beauhub.tw", password: "manager123", role: "MANAGER", title: "信義店店長 / 髮型師", baseSalary: 40000, serviceCommission: 0.13, productCommission: 0.06, color: "#0ea5e9" },
-    { storeId: store2.id, name: "許芳瑜", email: "fangyu@beauhub.tw", password: "staff123", role: "STAFF", title: "美甲師", baseSalary: 28000, serviceCommission: 0.12, productCommission: 0.05, color: "#14b8a6" },
-    { storeId: store2.id, name: "高子涵", email: "tzuhan@beauhub.tw", password: "staff123", role: "STAFF", title: "美容芳療師", payType: "HOURLY", baseSalary: 0, hourlyRate: 210, serviceCommission: 0.1, productCommission: 0.05, color: "#eab308" },
+    { storeId: store1.id, name: "王雅婷", email: "admin@beautytime.tw", password: "admin123", role: "ADMIN", title: "品牌總監", baseSalary: 45000, serviceCommission: 0.15, productCommission: 0.08, color: "#f97316" },
+    { storeId: store1.id, name: "陳思好", email: "siyu@beautytime.tw", password: "staff123", role: "STAFF", title: "髮型設計師", baseSalary: 30000, serviceCommission: 0.12, productCommission: 0.05, color: "#10b981" },
+    { storeId: store1.id, name: "林佳穎", email: "jiaying@beautytime.tw", password: "staff123", role: "STAFF", title: "美甲 / 美睫師", baseSalary: 28000, serviceCommission: 0.12, productCommission: 0.05, color: "#3b82f6" },
+    { storeId: store1.id, name: "張惠如", email: "huiru@beautytime.tw", password: "staff123", role: "STAFF", title: "芳療按摩師", baseSalary: 28000, serviceCommission: 0.1, productCommission: 0.05, color: "#a855f7" },
+    { storeId: store1.id, name: "李美慧", email: "meihui@beautytime.tw", password: "staff123", role: "STAFF", title: "美容師", payType: "HOURLY", baseSalary: 0, hourlyRate: 220, serviceCommission: 0.1, productCommission: 0.05, color: "#ec4899" },
+    { storeId: store2.id, name: "周冠廷", email: "kuanting@beautytime.tw", password: "manager123", role: "MANAGER", title: "信義店店長 / 髮型師", baseSalary: 40000, serviceCommission: 0.13, productCommission: 0.06, color: "#0ea5e9" },
+    { storeId: store2.id, name: "許芳瑜", email: "fangyu@beautytime.tw", password: "staff123", role: "STAFF", title: "美甲師", baseSalary: 28000, serviceCommission: 0.12, productCommission: 0.05, color: "#14b8a6" },
+    { storeId: store2.id, name: "高子涵", email: "tzuhan@beautytime.tw", password: "staff123", role: "STAFF", title: "美容芳療師", payType: "HOURLY", baseSalary: 0, hourlyRate: 210, serviceCommission: 0.1, productCommission: 0.05, color: "#eab308" },
   ];
   const staff: { id: string; name: string; storeId: string }[] = [];
   for (const s of staffData) {
@@ -247,9 +247,9 @@ async function main() {
   }
 
   console.log("Seed 完成：兩間分店、8 位員工、服務、產品、顧客、排班、打卡、銷售與預約資料已建立。");
-  console.log("管理者（可切換分店）：admin@beauhub.tw / admin123");
-  console.log("信義店店長：kuanting@beauhub.tw / manager123");
-  console.log("員工：siyu@beauhub.tw / staff123");
+  console.log("管理者（可切換分店）：admin@beautytime.tw / admin123");
+  console.log("信義店店長：kuanting@beautytime.tw / manager123");
+  console.log("員工：siyu@beautytime.tw / staff123");
 }
 
 main()

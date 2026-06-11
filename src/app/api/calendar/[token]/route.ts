@@ -52,7 +52,7 @@ export async function GET(
       .join("\n");
     return [
       "BEGIN:VEVENT",
-      `UID:appt-${a.id}@beauhub`,
+      `UID:appt-${a.id}@beautytime`,
       `DTSTAMP:${now}`,
       `DTSTART:${toUtc(a.startAt)}`,
       `DTEND:${toUtc(a.endAt)}`,
@@ -72,10 +72,10 @@ export async function GET(
   const ics = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//BeauHub//Appointments//TW",
+    "PRODID:-//BeautyTime//Appointments//TW",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
-    `X-WR-CALNAME:${escapeIcs(`BeauHub 預約（${staff.name}）`)}`,
+    `X-WR-CALNAME:${escapeIcs(`BeautyTime 預約（${staff.name}）`)}`,
     "X-WR-TIMEZONE:Asia/Taipei",
     "REFRESH-INTERVAL;VALUE=DURATION:PT30M",
     "X-PUBLISHED-TTL:PT30M",
@@ -86,7 +86,7 @@ export async function GET(
   return new Response(ics, {
     headers: {
       "Content-Type": "text/calendar; charset=utf-8",
-      "Content-Disposition": `attachment; filename="beauhub-${staff.id}.ics"`,
+      "Content-Disposition": `attachment; filename="beautytime-${staff.id}.ics"`,
       "Cache-Control": "private, max-age=300",
     },
   });
