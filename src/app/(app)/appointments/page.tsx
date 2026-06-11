@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/session";
+import { getActiveStoreId } from "@/lib/store-context";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -26,18 +29,23 @@ export default async function AppointmentsPage({
 }: {
   searchParams: Promise<{ date?: string }>;
 }) {
+  const me = await getSession();
+  if (!me) redirect("/login");
+  const storeId = await getActiveStoreId(me);
+  const staffStore = storeId ? { storeId } : {};
+
   const params = await searchParams;
   const todayStr = toYmd(new Date());
   const date = params.date ?? todayStr;
 
   const [appointments, customers, staffList, services] = await Promise.all([
     prisma.appointment.findMany({
-      where: { date },
+      where: { date, staff: staffStore },
       include: { customer: true, staff: true, service: true },
       orderBy: { startAt: "asc" },
     }),
     prisma.customer.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
-    prisma.staff.findMany({ where: { active: true }, select: { id: true, name: true } }),
+    prisma.staff.findMany({ where: { active: true, ...staffStore }, select: { id: true, name: true } }),
     prisma.service.findMany({
       where: { active: true },
       select: { id: true, name: true, price: true, durationMin: true },
@@ -127,6 +135,18 @@ export default async function AppointmentsPage({
                 <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground shrink-0">
                   {APPOINTMENT_SOURCE[a.source]}
                 </span>
+                {a.depositAmount > 0 && (
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs shrink-0 ${
+                      a.depositStatus === "PAID"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-amber-100 text-amber-700"
+                    }`}
+                  >
+                    訂金 ${a.depositAmount.toLocaleString()}
+                    {a.depositStatus === "PAID" ? "（已付）" : "（未付）"}
+                  </span>
+                )}
                 <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium shrink-0 ${statusColor[a.status]}`}>
                   {APPOINTMENT_STATUS[a.status]}
                 </span>

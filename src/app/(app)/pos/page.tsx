@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
+import { getActiveStoreId } from "@/lib/store-context";
 import { fmtMoney, PAYMENT_METHODS } from "@/lib/constants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PosClient } from "./pos-client";
@@ -9,19 +10,22 @@ export default async function PosPage() {
   const me = await getSession();
   if (!me) redirect("/login");
 
+  const storeId = await getActiveStoreId(me);
+  const staffStore = storeId ? { storeId } : {};
+
   const startOfToday = new Date();
   startOfToday.setHours(0, 0, 0, 0);
 
   const [services, products, staffList, customers, todaySales] = await Promise.all([
     prisma.service.findMany({ where: { active: true }, orderBy: [{ category: "asc" }, { price: "asc" }] }),
     prisma.product.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
-    prisma.staff.findMany({ where: { active: true }, select: { id: true, name: true } }),
+    prisma.staff.findMany({ where: { active: true, ...staffStore }, select: { id: true, name: true } }),
     prisma.customer.findMany({
       select: { id: true, name: true, phone: true, balance: true },
       orderBy: { name: "asc" },
     }),
     prisma.sale.findMany({
-      where: { createdAt: { gte: startOfToday } },
+      where: { createdAt: { gte: startOfToday }, cashier: staffStore },
       include: { items: true, customer: { select: { name: true } } },
       orderBy: { createdAt: "desc" },
       take: 8,

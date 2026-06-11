@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   const me = await getSession();
   if (!me || !isManager(me)) return NextResponse.json({ error: "需要管理者權限" }, { status: 403 });
 
-  const { name, category, price, durationMin, description } = await request.json();
+  const { name, category, price, durationMin, depositAmount, description } = await request.json();
   if (!name || !SERVICE_CATEGORIES[category] || !price) {
     return NextResponse.json({ error: "參數不足" }, { status: 400 });
   }
@@ -17,6 +17,7 @@ export async function POST(request: Request) {
       category,
       price: Number(price),
       durationMin: Number(durationMin) || 60,
+      depositAmount: Math.max(0, Number(depositAmount) || 0),
       description: description || null,
     },
   });

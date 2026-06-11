@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession, isManager } from "@/lib/session";
+import { getActiveStoreId } from "@/lib/store-context";
 import { ScheduleGrid } from "./schedule-grid";
 
 const toYmd = (d: Date) => {
@@ -28,9 +29,10 @@ export default async function SchedulePage({
     return toYmd(d);
   });
 
+  const storeId = await getActiveStoreId(me);
   const [staffList, shifts] = await Promise.all([
     prisma.staff.findMany({
-      where: { active: true },
+      where: { active: true, ...(storeId ? { storeId } : {}) },
       select: { id: true, name: true, title: true, color: true },
       orderBy: { createdAt: "asc" },
     }),

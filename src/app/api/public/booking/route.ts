@@ -1,21 +1,52 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { sendSms, bookingReceivedMessage } from "@/lib/notify";
+
+const bookingSchema = z.object({
+  serviceId: z.string().min(1).max(64),
+  staffId: z.string().min(1).max(64),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  time: z.string().regex(/^\d{2}:\d{2}$/),
+  name: z.string().trim().min(1).max(30),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^[\d\-+() ]{8,20}$/, "手機號碼格式不正確"),
+  note: z.string().max(200).optional().nullable(),
+});
 
 // 顧客線上預約（公開，免登入）
 export async function POST(request: Request) {
-  const { serviceId, staffId, date, time, name, phone, note } = await request.json();
-  if (!serviceId || !staffId || !date || !time || !name || !phone) {
-    return NextResponse.json({ error: "請完整填寫預約資訊" }, { status: 400 });
+  const ip = clientIp(request);
+  if (!rateLimit(`booking:${ip}`, 10, 60_000).ok) {
+    return NextResponse.json({ error: "操作過於頻繁，請稍後再試" }, { status: 429 });
   }
 
-  const service = await prisma.service.findUnique({ where: { id: serviceId } });
+  const parsed = bookingSchema.safeParse(await request.json().catch(() => ({})));
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.issues[0]?.message ?? "請完整填寫預約資訊" },
+      { status: 400 }
+    );
+  }
+  const { serviceId, staffId, date, time, name, phone, note } = parsed.data;
+
+  const [service, staffMember] = await Promise.all([
+    prisma.service.findUnique({ where: { id: serviceId } }),
+    prisma.staff.findUnique({ where: { id: staffId }, include: { store: true } }),
+  ]);
   if (!service || !service.active) {
     return NextResponse.json({ error: "服務項目不存在" }, { status: 404 });
+  }
+  if (!staffMember || !staffMember.active) {
+    return NextResponse.json({ error: "服務人員不存在" }, { status: 404 });
   }
 
   const startAt = new Date(`${date}T${time}:00`);
   const endAt = new Date(startAt.getTime() + service.durationMin * 60000);
-  if (startAt < new Date()) {
+  if (Number.isNaN(startAt.getTime()) || startAt < new Date()) {
     return NextResponse.json({ error: "無法預約過去的時間" }, { status: 400 });
   }
 
@@ -57,8 +88,25 @@ export async function POST(request: Request) {
       status: "PENDING",
       source: "ONLINE",
       note: note || null,
+      depositAmount: service.depositAmount,
+      depositStatus: service.depositAmount > 0 ? "UNPAID" : "NONE",
     },
     include: { staff: true, service: true },
+  });
+
+  // 預約受理通知（簡訊；未設定金鑰時記錄為模擬發送）
+  await sendSms({
+    to: phone,
+    kind: "BOOKING_RECEIVED",
+    appointmentId: appointment.id,
+    message: bookingReceivedMessage({
+      storeName: staffMember.store.name,
+      customerName: customer.name,
+      serviceName: service.name,
+      date,
+      startAt,
+      deposit: service.depositAmount || undefined,
+    }),
   });
 
   return NextResponse.json({
@@ -67,5 +115,6 @@ export async function POST(request: Request) {
     time,
     serviceName: appointment.service.name,
     staffName: appointment.staff.name,
+    depositAmount: service.depositAmount,
   });
 }

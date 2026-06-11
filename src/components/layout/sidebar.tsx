@@ -17,6 +17,9 @@ import {
   Sparkles,
   LogOut,
   Globe,
+  BellRing,
+  BarChart3,
+  Store,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ROLES } from "@/lib/constants";
@@ -36,6 +39,7 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
       { href: "/appointments", label: "預約管理", icon: CalendarDays },
       { href: "/pos", label: "POS 收款", icon: ShoppingCart },
       { href: "/clock", label: "上下班打卡", icon: Clock },
+      { href: "/notifications", label: "通知紀錄", icon: BellRing, managerOnly: true },
     ],
   },
   {
@@ -54,6 +58,7 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
   {
     title: "店務設定",
     items: [
+      { href: "/reports", label: "跨店報表", icon: BarChart3, managerOnly: true },
       { href: "/services", label: "服務項目", icon: Scissors, managerOnly: true },
       { href: "/inventory", label: "產品庫存", icon: Package, managerOnly: true },
     ],
@@ -62,8 +67,12 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
 
 export function Sidebar({
   staff,
+  stores,
+  activeStoreId,
 }: {
   staff: { name: string; role: string; title: string | null; storeName: string };
+  stores: { id: string; name: string }[];
+  activeStoreId: string | null;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -72,6 +81,15 @@ export function Sidebar({
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
+    router.refresh();
+  }
+
+  async function switchStore(storeId: string) {
+    await fetch("/api/store-switch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ storeId }),
+    });
     router.refresh();
   }
 
@@ -84,6 +102,26 @@ export function Sidebar({
           <p className="text-xs text-muted-foreground leading-tight">{staff.storeName}</p>
         </div>
       </div>
+
+      {/* 管理者：分店切換器 */}
+      {staff.role === "ADMIN" && stores.length > 1 && (
+        <div className="border-b px-3 py-2.5">
+          <div className="flex items-center gap-1.5 px-1 mb-1 text-xs text-muted-foreground">
+            <Store className="h-3.5 w-3.5" /> 檢視分店
+          </div>
+          <select
+            className="w-full rounded-md border border-input bg-background px-2 py-1.5 text-sm"
+            value={activeStoreId ?? "all"}
+            onChange={(e) => switchStore(e.target.value)}
+          >
+            <option value="all">全部分店</option>
+            {stores.map((s) => (
+              <option key={s.id} value={s.id}>{s.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
         {NAV_GROUPS.map((group) => {
           const items = group.items.filter((i) => !i.managerOnly || manager);

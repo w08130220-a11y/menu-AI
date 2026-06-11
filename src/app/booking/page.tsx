@@ -6,16 +6,16 @@ export const metadata = { title: "線上預約" };
 export const dynamic = "force-dynamic";
 
 export default async function BookingPage() {
-  const [store, services, staffList] = await Promise.all([
-    prisma.store.findFirst(),
+  const [stores, services, staffList] = await Promise.all([
+    prisma.store.findMany({ orderBy: { name: "asc" } }),
     prisma.service.findMany({
       where: { active: true },
-      select: { id: true, name: true, category: true, price: true, durationMin: true, description: true },
+      select: { id: true, name: true, category: true, price: true, durationMin: true, description: true, depositAmount: true },
       orderBy: [{ category: "asc" }, { price: "asc" }],
     }),
     prisma.staff.findMany({
       where: { active: true },
-      select: { id: true, name: true, title: true, color: true },
+      select: { id: true, name: true, title: true, color: true, storeId: true },
       orderBy: { createdAt: "asc" },
     }),
   ]);
@@ -26,9 +26,9 @@ export default async function BookingPage() {
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-4">
           <div className="flex items-center gap-2 text-primary">
             <Sparkles className="h-6 w-6" />
-            <span className="text-xl font-bold">{store?.name ?? "BeauHub"}</span>
+            <span className="text-xl font-bold">BeauHub</span>
           </div>
-          <span className="text-sm text-muted-foreground">{store?.phone}</span>
+          <span className="text-sm text-muted-foreground">{stores[0]?.phone}</span>
         </div>
       </header>
       <main className="mx-auto max-w-3xl px-4 py-8">
@@ -37,9 +37,9 @@ export default async function BookingPage() {
           免註冊，四步驟完成預約
         </p>
         <BookingClient
+          stores={stores.map((s) => ({ id: s.id, name: s.name, address: s.address }))}
           services={services}
           staffList={staffList}
-          storeName={store?.name ?? "BeauHub"}
         />
       </main>
     </div>

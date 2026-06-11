@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession, isManager } from "@/lib/session";
+import { getActiveStoreId } from "@/lib/store-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PunchButton } from "./punch-button";
 
@@ -21,6 +22,7 @@ export default async function ClockPage() {
 
   const todayStr = ymd(new Date());
   const weekAgo = ymd(new Date(Date.now() - 7 * 86400000));
+  const storeId = await getActiveStoreId(staff);
 
   const [openRecord, myRecords, allToday] = await Promise.all([
     prisma.timeRecord.findFirst({ where: { staffId: staff.id, clockOut: null } }),
@@ -30,7 +32,7 @@ export default async function ClockPage() {
     }),
     isManager(staff)
       ? prisma.timeRecord.findMany({
-          where: { workDate: todayStr },
+          where: { workDate: todayStr, staff: storeId ? { storeId } : {} },
           include: { staff: { select: { name: true, title: true } } },
           orderBy: { clockIn: "asc" },
         })

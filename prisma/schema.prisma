@@ -101,14 +101,15 @@ model CustomerPass {
 
 // 服務項目。category: HAIR | NAIL | LASH | SPA | FACIAL
 model Service {
-  id           String        @id @default(cuid())
-  name         String
-  category     String
-  price        Int
-  durationMin  Int           @default(60)
-  description  String?
-  active       Boolean       @default(true)
-  appointments Appointment[]
+  id            String        @id @default(cuid())
+  name          String
+  category      String
+  price         Int
+  durationMin   Int           @default(60)
+  depositAmount Int           @default(0) // 線上預約訂金（0 = 免訂金）
+  description   String?
+  active        Boolean       @default(true)
+  appointments  Appointment[]
 }
 
 // 販售產品（含庫存）
@@ -139,10 +140,31 @@ model Appointment {
   status     String   @default("PENDING")
   source     String   @default("WALK_IN")
   note       String?
+  // 訂金。depositStatus: NONE | UNPAID | PAID | REFUNDED
+  depositAmount Int      @default(0)
+  depositStatus String   @default("NONE")
+  depositPaidAt DateTime?
   createdAt  DateTime @default(now())
+
+  notifications Notification[]
 
   @@index([date])
   @@index([staffId, date])
+}
+
+// 通知紀錄（簡訊 / LINE）。status: SENT | SIMULATED | FAILED
+model Notification {
+  id            String       @id @default(cuid())
+  channel       String // SMS | LINE
+  recipient     String
+  message       String
+  status        String       @default("SIMULATED")
+  kind          String // BOOKING_RECEIVED | BOOKING_CONFIRMED | REMINDER | DEPOSIT_PAID
+  appointmentId String?
+  appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  createdAt     DateTime     @default(now())
+
+  @@index([createdAt])
 }
 
 // POS 結帳單。paymentMethod: CASH | CARD | TRANSFER | BALANCE

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession, isManager } from "@/lib/session";
+import { getActiveStoreId } from "@/lib/store-context";
 import { Card, CardContent } from "@/components/ui/card";
 import { ROLES } from "@/lib/constants";
 import { StaffDialog, ToggleStaffActive } from "./staff-dialog";
@@ -10,7 +11,12 @@ export default async function StaffPage() {
   if (!me) redirect("/login");
   if (!isManager(me)) redirect("/dashboard");
 
-  const staffList = await prisma.staff.findMany({ orderBy: { createdAt: "asc" } });
+  const storeId = await getActiveStoreId(me);
+  const staffList = await prisma.staff.findMany({
+    where: storeId ? { storeId } : {},
+    include: { store: { select: { name: true } } },
+    orderBy: { createdAt: "asc" },
+  });
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -46,7 +52,9 @@ export default async function StaffPage() {
                       <span>
                         <span className="font-medium">{s.name}</span>
                         <br />
-                        <span className="text-xs text-muted-foreground">{s.title}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {s.title}・{s.store.name}
+                        </span>
                       </span>
                     </span>
                   </td>

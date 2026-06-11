@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession, isManager, hashPassword } from "@/lib/session";
+import { getActiveStoreId } from "@/lib/store-context";
 
 export async function POST(request: Request) {
   const me = await getSession();
@@ -14,9 +15,11 @@ export async function POST(request: Request) {
   const exists = await prisma.staff.findUnique({ where: { email } });
   if (exists) return NextResponse.json({ error: "Email 已被使用" }, { status: 409 });
 
+  // 新員工歸屬：管理者切換中的分店，未指定時為自己所屬分店
+  const activeStoreId = await getActiveStoreId(me);
   const staff = await prisma.staff.create({
     data: {
-      storeId: me.storeId,
+      storeId: activeStoreId ?? me.storeId,
       name,
       email,
       password: hashPassword(password),

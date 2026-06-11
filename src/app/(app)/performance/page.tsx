@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession, isManager } from "@/lib/session";
+import { getActiveStoreId } from "@/lib/store-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { fmtMoney } from "@/lib/constants";
@@ -33,17 +34,19 @@ export default async function PerformancePage({
 
   const manager = isManager(me);
   const selectedStaffId = manager ? params.staff ?? "" : me.id;
+  const storeId = await getActiveStoreId(me);
+  const staffStore = storeId ? { storeId } : {};
 
   const [staffList, items] = await Promise.all([
     prisma.staff.findMany({
-      where: { active: true },
+      where: { active: true, ...staffStore },
       select: { id: true, name: true },
       orderBy: { createdAt: "asc" },
     }),
     prisma.saleItem.findMany({
       where: {
         sale: { createdAt: { gte: start, lt: end } },
-        ...(selectedStaffId ? { staffId: selectedStaffId } : {}),
+        ...(selectedStaffId ? { staffId: selectedStaffId } : { staff: staffStore }),
       },
       include: {
         staff: { select: { name: true } },

@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/session";
+import { getActiveStoreId } from "@/lib/store-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   fmtMoney,
@@ -21,6 +24,11 @@ const ymd = (d: Date) => {
 };
 
 export default async function DashboardPage() {
+  const me = await getSession();
+  if (!me) redirect("/login");
+  const storeId = await getActiveStoreId(me);
+  const staffStore = storeId ? { storeId } : {};
+
   const now = new Date();
   const todayStr = ymd(now);
   const startOfToday = new Date(now);
@@ -39,19 +47,19 @@ export default async function DashboardPage() {
     monthItems,
     lowStock,
   ] = await Promise.all([
-    prisma.sale.aggregate({ _sum: { total: true }, _count: true, where: { createdAt: { gte: startOfToday } } }),
-    prisma.sale.aggregate({ _sum: { total: true }, _count: true, where: { createdAt: { gte: startOfMonth } } }),
+    prisma.sale.aggregate({ _sum: { total: true }, _count: true, where: { createdAt: { gte: startOfToday }, cashier: staffStore } }),
+    prisma.sale.aggregate({ _sum: { total: true }, _count: true, where: { createdAt: { gte: startOfMonth }, cashier: staffStore } }),
     prisma.appointment.findMany({
-      where: { date: todayStr },
+      where: { date: todayStr, staff: staffStore },
       include: { customer: true, staff: true, service: true },
       orderBy: { startAt: "asc" },
     }),
     prisma.customer.count({ where: { createdAt: { gte: startOfMonth } } }),
-    prisma.timeRecord.count({ where: { workDate: todayStr } }),
-    prisma.staff.count({ where: { active: true } }),
-    prisma.sale.findMany({ where: { createdAt: { gte: start14 } }, select: { total: true, createdAt: true, paymentMethod: true } }),
+    prisma.timeRecord.count({ where: { workDate: todayStr, staff: staffStore } }),
+    prisma.staff.count({ where: { active: true, ...staffStore } }),
+    prisma.sale.findMany({ where: { createdAt: { gte: start14 }, cashier: staffStore }, select: { total: true, createdAt: true, paymentMethod: true } }),
     prisma.saleItem.findMany({
-      where: { sale: { createdAt: { gte: startOfMonth } } },
+      where: { sale: { createdAt: { gte: startOfMonth }, cashier: staffStore } },
       include: { staff: { select: { name: true } } },
     }),
     prisma.product.findMany({ where: { active: true } }),

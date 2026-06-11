@@ -22,6 +22,7 @@ type ServiceInput = {
   category: string;
   price: number | string;
   durationMin: number | string;
+  depositAmount?: number | string;
   description?: string | null;
 };
 
@@ -36,6 +37,7 @@ export function ServiceDialog({ service }: { service?: ServiceInput }) {
     category: service?.category ?? "HAIR",
     price: service?.price ?? "",
     durationMin: service?.durationMin ?? 60,
+    depositAmount: service?.depositAmount ?? 0,
     description: service?.description ?? "",
   });
 
@@ -101,6 +103,15 @@ export function ServiceDialog({ service }: { service?: ServiceInput }) {
               <Label>時長（分鐘）</Label>
               <Input type="number" min={15} step={15} value={form.durationMin} onChange={(e) => setForm((f) => ({ ...f, durationMin: e.target.value }))} />
             </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label>線上預約訂金（NT$，0 = 免訂金）</Label>
+            <Input
+              type="number"
+              min={0}
+              value={form.depositAmount}
+              onChange={(e) => setForm((f) => ({ ...f, depositAmount: e.target.value }))}
+            />
           </div>
           <div className="space-y-1.5">
             <Label>說明（顯示於線上預約）</Label>

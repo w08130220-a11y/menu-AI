@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession, isManager } from "@/lib/session";
+import { getActiveStoreId } from "@/lib/store-context";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { fmtMoney } from "@/lib/constants";
@@ -31,7 +32,10 @@ export default async function PayrollPage({
   const { start, end, prev, next } = monthRange(month);
   const monthPrefix = month; // workDate YYYY-MM-DD 以字串前綴篩選
 
-  const staffWhere = isManager(me) ? { active: true } : { id: me.id };
+  const storeId = await getActiveStoreId(me);
+  const staffWhere = isManager(me)
+    ? { active: true, ...(storeId ? { storeId } : {}) }
+    : { id: me.id };
 
   const [staffList, items, timeRecords] = await Promise.all([
     prisma.staff.findMany({ where: staffWhere, orderBy: { createdAt: "asc" } }),

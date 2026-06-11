@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Check, ChevronLeft, CalendarCheck } from "lucide-react";
+import { Check, ChevronLeft, CalendarCheck, CreditCard, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SERVICE_CATEGORIES, fmtMoney } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
+type Store = { id: string; name: string; address: string | null };
 type Service = {
   id: string;
   name: string;
@@ -15,20 +16,22 @@ type Service = {
   price: number;
   durationMin: number;
   description: string | null;
+  depositAmount: number;
 };
-type Staff = { id: string; name: string; title: string | null; color: string };
+type Staff = { id: string; name: string; title: string | null; color: string; storeId: string };
 
 const STEPS = ["選擇服務", "選擇人員", "選擇時間", "填寫資料"];
 
 export function BookingClient({
+  stores,
   services,
   staffList,
-  storeName,
 }: {
+  stores: Store[];
   services: Service[];
   staffList: Staff[];
-  storeName: string;
 }) {
+  const [storeId, setStoreId] = useState(stores[0]?.id ?? "");
   const [step, setStep] = useState(0);
   const [service, setService] = useState<Service | null>(null);
   const [staff, setStaff] = useState<Staff | null>(null);
@@ -40,12 +43,20 @@ export function BookingClient({
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [done, setDone] = useState<{ date: string; time: string; serviceName: string; staffName: string } | null>(null);
+  const [done, setDone] = useState<{
+    id: string;
+    date: string;
+    time: string;
+    serviceName: string;
+    staffName: string;
+    depositAmount: number;
+  } | null>(null);
 
+  const store = stores.find((s) => s.id === storeId);
+  const storeStaff = staffList.filter((s) => s.storeId === storeId);
   const categories = [...new Set(services.map((s) => s.category))];
   const [cat, setCat] = useState(categories[0] ?? "HAIR");
 
-  // 未來 14 天
   const days = Array.from({ length: 14 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
@@ -92,31 +103,76 @@ export function BookingClient({
   }
 
   if (done) {
+    const needDeposit = done.depositAmount > 0;
     return (
       <div className="mx-auto max-w-md text-center py-10">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-          <CalendarCheck className="h-8 w-8 text-emerald-600" />
+        <div className={cn(
+          "mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full",
+          needDeposit ? "bg-amber-100" : "bg-emerald-100"
+        )}>
+          {needDeposit ? (
+            <CreditCard className="h-8 w-8 text-amber-600" />
+          ) : (
+            <CalendarCheck className="h-8 w-8 text-emerald-600" />
+          )}
         </div>
-        <h2 className="text-2xl font-bold mb-2">預約申請已送出！</h2>
+        <h2 className="text-2xl font-bold mb-2">
+          {needDeposit ? "再一步：支付訂金完成預約" : "預約申請已送出！"}
+        </h2>
         <p className="text-muted-foreground mb-6">
-          門市確認後預約即生效，若有變動將以電話聯繫您。
+          {needDeposit
+            ? `此服務需支付訂金 ${fmtMoney(done.depositAmount)}，付款後預約立即成立（可於結帳時折抵）。`
+            : "已發送簡訊通知，門市確認後預約即生效。"}
         </p>
         <div className="rounded-lg border bg-card p-5 text-left space-y-2 text-sm">
-          <Row label="店家" value={storeName} />
+          <Row label="店家" value={store?.name ?? ""} />
           <Row label="服務" value={done.serviceName} />
           <Row label="服務人員" value={done.staffName} />
           <Row label="日期時間" value={`${done.date} ${done.time}`} />
           <Row label="預約人" value={`${name}（${phone}）`} />
+          {needDeposit && <Row label="訂金" value={fmtMoney(done.depositAmount)} />}
         </div>
-        <Button className="mt-6" onClick={() => location.reload()}>
-          再預約一筆
-        </Button>
+        {needDeposit ? (
+          <Button asChild className="mt-6 h-11 px-8 text-base">
+            <a href={`/booking/pay/${done.id}`}>
+              <CreditCard className="mr-2 h-5 w-5" /> 前往付款 {fmtMoney(done.depositAmount)}
+            </a>
+          </Button>
+        ) : (
+          <Button className="mt-6" onClick={() => location.reload()}>
+            再預約一筆
+          </Button>
+        )}
       </div>
     );
   }
 
   return (
     <div className="mx-auto max-w-2xl">
+      {/* 分店選擇 */}
+      {stores.length > 1 && step === 0 && (
+        <div className="mb-6 flex flex-wrap justify-center gap-2">
+          {stores.map((s) => (
+            <button
+              key={s.id}
+              onClick={() => {
+                setStoreId(s.id);
+                setStaff(null);
+              }}
+              className={cn(
+                "flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-medium",
+                storeId === s.id
+                  ? "bg-foreground text-background border-foreground"
+                  : "hover:bg-muted"
+              )}
+            >
+              <MapPin className="h-3.5 w-3.5" />
+              {s.name}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* 步驟指示 */}
       <div className="mb-8 flex items-center justify-center gap-1.5 sm:gap-3">
         {STEPS.map((label, i) => (
@@ -186,7 +242,14 @@ export function BookingClient({
                     <p className="text-xs text-muted-foreground mt-1">{s.description}</p>
                   )}
                   <div className="mt-2 flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">約 {s.durationMin} 分鐘</span>
+                    <span className="text-xs text-muted-foreground">
+                      約 {s.durationMin} 分鐘
+                      {s.depositAmount > 0 && (
+                        <span className="ml-1 rounded bg-amber-100 px-1.5 py-0.5 text-amber-700">
+                          訂金 ${s.depositAmount}
+                        </span>
+                      )}
+                    </span>
                     <span className="font-bold text-primary">{fmtMoney(s.price)}</span>
                   </div>
                 </button>
@@ -198,7 +261,7 @@ export function BookingClient({
       {/* Step 2: 人員 */}
       {step === 1 && (
         <div className="grid gap-3 sm:grid-cols-2">
-          {staffList.map((s) => (
+          {storeStaff.map((s) => (
             <button
               key={s.id}
               onClick={() => {
@@ -290,13 +353,17 @@ export function BookingClient({
       {step === 3 && (
         <form onSubmit={submit} className="space-y-4 max-w-md mx-auto">
           <div className="rounded-lg border bg-muted/40 p-4 text-sm space-y-1.5">
+            <Row label="店家" value={store?.name ?? ""} />
             <Row label="服務" value={`${service?.name}（${fmtMoney(service?.price ?? 0)}）`} />
             <Row label="服務人員" value={staff?.name ?? ""} />
             <Row label="日期時間" value={`${date} ${time}`} />
+            {!!service?.depositAmount && (
+              <Row label="預約訂金" value={`${fmtMoney(service.depositAmount)}（線上支付）`} />
+            )}
           </div>
           <div className="space-y-1.5">
             <Label>姓名 *</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} required />
+            <Input value={name} onChange={(e) => setName(e.target.value)} maxLength={30} required />
           </div>
           <div className="space-y-1.5">
             <Label>手機號碼 *</Label>
@@ -305,16 +372,18 @@ export function BookingClient({
               placeholder="09xx-xxx-xxx"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
+              maxLength={20}
               required
             />
+            <p className="text-xs text-muted-foreground">預約通知與提醒將以簡訊發送至此號碼</p>
           </div>
           <div className="space-y-1.5">
             <Label>備註（選填）</Label>
-            <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="想要的款式、注意事項…" />
+            <Input value={note} onChange={(e) => setNote(e.target.value)} maxLength={200} placeholder="想要的款式、注意事項…" />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" className="w-full h-11 text-base" disabled={loading}>
-            {loading ? "送出中…" : "確認預約"}
+            {loading ? "送出中…" : service?.depositAmount ? "確認預約，前往付訂金" : "確認預約"}
           </Button>
         </form>
       )}

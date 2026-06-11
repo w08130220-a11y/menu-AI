@@ -1,17 +1,23 @@
 import { cookies } from "next/headers";
-import { createHmac, createHash } from "crypto";
+import { createHmac, timingSafeEqual } from "crypto";
 import { prisma } from "@/lib/prisma";
 
-const SECRET = process.env.AUTH_SECRET ?? "dev-secret-key";
 const COOKIE_NAME = "bs_session";
 const MAX_AGE = 60 * 60 * 24 * 7; // 7 天
 
-export function hashPassword(password: string) {
-  return createHash("sha256").update(`bs:${password}`).digest("hex");
+function secret() {
+  const s = process.env.AUTH_SECRET;
+  if (!s || s === "change-me-in-production") {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("AUTH_SECRET 未設定：正式環境必須設定強隨機密鑰");
+    }
+    return "dev-secret-key";
+  }
+  return s;
 }
 
 function sign(payload: string) {
-  return createHmac("sha256", SECRET).update(payload).digest("hex");
+  return createHmac("sha256", secret()).update(payload).digest("hex");
 }
 
 export async function createSession(staffId: string) {
@@ -22,6 +28,7 @@ export async function createSession(staffId: string) {
   store.set(COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: MAX_AGE,
   });
@@ -39,7 +46,9 @@ export async function getSession() {
   const parts = token.split(".");
   if (parts.length !== 3) return null;
   const [staffId, exp, sig] = parts;
-  if (sign(`${staffId}.${exp}`) !== sig) return null;
+  const expected = Buffer.from(sign(`${staffId}.${exp}`));
+  const actual = Buffer.from(sig);
+  if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) return null;
   if (Number(exp) < Date.now()) return null;
   const staff = await prisma.staff.findUnique({
     where: { id: staffId },
@@ -58,3 +67,5 @@ export async function requireSession() {
 export function isManager(staff: { role: string }) {
   return staff.role === "ADMIN" || staff.role === "MANAGER";
 }
+
+export { hashPassword, verifyPassword } from "@/lib/password";

@@ -18,6 +18,7 @@ export async function PATCH(
       ...(body.category !== undefined && { category: body.category }),
       ...(body.price !== undefined && { price: Number(body.price) }),
       ...(body.durationMin !== undefined && { durationMin: Number(body.durationMin) }),
+      ...(body.depositAmount !== undefined && { depositAmount: Math.max(0, Number(body.depositAmount) || 0) }),
       ...(body.description !== undefined && { description: body.description || null }),
       ...(body.active !== undefined && { active: !!body.active }),
     },
