@@ -18,6 +18,18 @@ async function main() {
   await prisma.notification.deleteMany();
   await prisma.balanceTransaction.deleteMany();
   await prisma.passTemplate.deleteMany();
+  await prisma.subscription.deleteMany();
+
+  // 示範訂閱：免費試用中（剩 5 天）
+  await prisma.subscription.create({
+    data: {
+      plan: "MONTHLY",
+      status: "TRIALING",
+      trialUsed: true,
+      trialEndsAt: addDays(new Date(), 5),
+      currentPeriodEnd: addDays(new Date(), 35),
+    },
+  });
   await prisma.saleItem.deleteMany();
   await prisma.sale.deleteMany();
   await prisma.appointment.deleteMany();

@@ -20,6 +20,7 @@ import {
   BellRing,
   BarChart3,
   Store,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ROLES } from "@/lib/constants";
@@ -30,6 +31,7 @@ type NavItem = {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   managerOnly?: boolean;
+  adminOnly?: boolean;
 };
 
 const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
@@ -62,6 +64,7 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
       { key: "reports", href: "/reports", label: "跨店報表", icon: BarChart3, managerOnly: true },
       { key: "services", href: "/services", label: "服務項目", icon: Scissors, managerOnly: true },
       { key: "inventory", href: "/inventory", label: "產品庫存", icon: Package, managerOnly: true },
+      { key: "billing", href: "/billing", label: "訂閱方案", icon: CreditCard, adminOnly: true },
     ],
   },
 ];
@@ -128,6 +131,7 @@ export function Sidebar({
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
         {NAV_GROUPS.map((group) => {
           const items = group.items.filter((i) => {
+            if (i.adminOnly) return staff.role === "ADMIN";
             if (i.managerOnly) return manager;
             if (i.key === "clock") return true;
             return manager || allowed.includes(i.key);
