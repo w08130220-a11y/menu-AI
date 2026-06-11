@@ -53,6 +53,7 @@ model Staff {
   productCommission Float         @default(0.05) // 產品銷售抽成
   color             String        @default("#f97316") // 排班 / 行事曆顯示色
   permissions       String? // 員工可見頁籤（逗號分隔；null = 預設全部開放）
+  calendarToken     String?       @unique // 個人行事曆訂閱（iCal feed）金鑰
   active            Boolean       @default(true)
   createdAt         DateTime      @default(now())
   timeRecords       TimeRecord[]

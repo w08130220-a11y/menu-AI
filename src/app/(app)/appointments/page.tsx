@@ -12,6 +12,7 @@ import {
   SERVICE_CATEGORIES,
 } from "@/lib/constants";
 import { StatusButtons, NewAppointmentDialog } from "./appointment-actions";
+import { CalendarSubscribe } from "./calendar-subscribe";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const toYmd = (d: Date) => {
@@ -90,6 +91,7 @@ export default async function AppointmentsPage({
               後一天 <ChevronRight className="h-4 w-4" />
             </Link>
           </Button>
+          <CalendarSubscribe />
           <NewAppointmentDialog
             customers={customers}
             staffList={staffList}
