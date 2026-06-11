@@ -31,7 +31,19 @@ export const SHIFT_TYPES: Record<string, { label: string; start: string; end: st
   MORNING: { label: "早班", start: "10:00", end: "16:00" },
   EVENING: { label: "晚班", start: "14:00", end: "20:00" },
   FULL: { label: "全班", start: "10:00", end: "20:00" },
+  CUSTOM: { label: "自訂", start: "", end: "" },
   OFF: { label: "休假", start: "", end: "" },
+};
+
+export const LEAVE_TYPES: Record<string, string> = {
+  PERSONAL: "事假",
+  SICK: "病假",
+};
+
+export const CLOCK_MODES: Record<string, string> = {
+  ANY: "不限制",
+  IP: "限店內網路（IP）",
+  GPS: "限店面位置（GPS）",
 };
 
 export const ROLES: Record<string, string> = {

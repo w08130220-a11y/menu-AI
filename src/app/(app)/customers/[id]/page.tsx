@@ -9,6 +9,7 @@ import {
 } from "@/lib/constants";
 import { CustomerDialog } from "../customer-dialog";
 import { TopupDialog, AddPassDialog, UsePassButton } from "./customer-actions";
+import { PhotoSection } from "./photo-section";
 import { ArrowLeft, Cake, Phone, Mail } from "lucide-react";
 
 export default async function CustomerDetailPage({
@@ -21,6 +22,7 @@ export default async function CustomerDetailPage({
     where: { id },
     include: {
       passes: { orderBy: { createdAt: "desc" } },
+      photos: { orderBy: { createdAt: "desc" } },
       sales: {
         include: { items: true },
         orderBy: { createdAt: "desc" },
@@ -114,6 +116,23 @@ export default async function CustomerDetailPage({
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">施作紀錄照片</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PhotoSection
+            customerId={customer.id}
+            photos={customer.photos.map((p) => ({
+              id: p.id,
+              fileName: p.fileName,
+              caption: p.caption,
+              createdAt: p.createdAt.toISOString(),
+            }))}
+          />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader className="pb-2">

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent } from "@/components/ui/card";
 import { fmtMoney } from "@/lib/constants";
 import { CustomerDialog } from "./customer-dialog";
+import { ImportDialog } from "./import-dialog";
 import { Search } from "lucide-react";
 
 export default async function CustomersPage({
@@ -30,7 +31,10 @@ export default async function CustomersPage({
           <h1 className="text-2xl font-bold">顧客管理</h1>
           <p className="text-muted-foreground text-sm">共 {customers.length} 位顧客</p>
         </div>
-        <CustomerDialog />
+        <div className="flex gap-2">
+          <ImportDialog />
+          <CustomerDialog />
+        </div>
       </div>
 
       <form className="relative max-w-sm">

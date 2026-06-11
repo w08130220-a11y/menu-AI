@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { getSession, isManager } from "@/lib/session";
 import { getActiveStoreId } from "@/lib/store-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PunchButton } from "./punch-button";
+import { ClockSettingsDialog } from "./clock-settings";
 
 const ymd = (d: Date) => {
   const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
@@ -39,17 +41,34 @@ export default async function ClockPage() {
       : Promise.resolve([]),
   ]);
 
+  const hdrs = await headers();
+  const currentIp = hdrs.get("x-forwarded-for")?.split(",")[0].trim() ?? "local";
+
   return (
     <div className="space-y-6 max-w-5xl">
-      <div>
-        <h1 className="text-2xl font-bold">上下班打卡</h1>
-        <p className="text-muted-foreground text-sm">{staff.name}，記得上下班都要打卡喔</p>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">上下班打卡</h1>
+          <p className="text-muted-foreground text-sm">{staff.name}，記得上下班都要打卡喔</p>
+        </div>
+        {isManager(staff) && (
+          <ClockSettingsDialog
+            settings={{
+              clockMode: staff.store.clockMode,
+              allowedIps: staff.store.allowedIps,
+              latitude: staff.store.latitude,
+              longitude: staff.store.longitude,
+              radiusM: staff.store.radiusM,
+            }}
+            currentIp={currentIp}
+          />
+        )}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardContent>
-            <PunchButton working={!!openRecord} />
+            <PunchButton working={!!openRecord} clockMode={staff.store.clockMode} />
           </CardContent>
         </Card>
 

@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogIn, LogOut } from "lucide-react";
+import { LogIn, LogOut, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-export function PunchButton({ working }: { working: boolean }) {
+export function PunchButton({ working, clockMode }: { working: boolean; clockMode: string }) {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -17,18 +17,41 @@ export function PunchButton({ working }: { working: boolean }) {
     return () => clearInterval(t);
   }, []);
 
+  function getPosition(): Promise<{ lat: number; lng: number }> {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) return reject(new Error("此瀏覽器不支援定位"));
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => reject(new Error("無法取得位置，請允許定位權限")),
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    });
+  }
+
   async function punch() {
     setLoading(true);
-    const res = await fetch("/api/clock", { method: "POST" });
-    if (res.ok) {
-      const { action } = await res.json();
-      toast({
-        title: action === "IN" ? "上班打卡成功" : "下班打卡成功",
-        description: new Date().toLocaleTimeString("zh-TW", { hour12: false }),
+    try {
+      let body = {};
+      if (clockMode === "GPS") {
+        body = await getPosition();
+      }
+      const res = await fetch("/api/clock", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
       });
-      router.refresh();
-    } else {
-      toast({ title: "打卡失敗，請重試", variant: "destructive" });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        toast({
+          title: data.action === "IN" ? "上班打卡成功" : "下班打卡成功",
+          description: new Date().toLocaleTimeString("zh-TW", { hour12: false }),
+        });
+        router.refresh();
+      } else {
+        toast({ title: data.error ?? "打卡失敗，請重試", variant: "destructive" });
+      }
+    } catch (e) {
+      toast({ title: e instanceof Error ? e.message : "打卡失敗", variant: "destructive" });
     }
     setLoading(false);
   }
@@ -49,10 +72,16 @@ export function PunchButton({ working }: { working: boolean }) {
         }`}
       >
         {working ? <LogOut className="h-8 w-8" /> : <LogIn className="h-8 w-8" />}
-        {working ? "下班打卡" : "上班打卡"}
+        {loading ? "處理中…" : working ? "下班打卡" : "上班打卡"}
       </button>
-      <p className="text-sm text-muted-foreground">
-        {working ? "你目前為上班狀態" : "點擊開始今天的工作"}
+      <p className="text-sm text-muted-foreground flex items-center gap-1">
+        {clockMode === "GPS" && (
+          <>
+            <MapPin className="h-3.5 w-3.5" /> 需在店面範圍內打卡（GPS 驗證）
+          </>
+        )}
+        {clockMode === "IP" && "需連接店內網路才能打卡"}
+        {clockMode === "ANY" && (working ? "你目前為上班狀態" : "點擊開始今天的工作")}
       </p>
     </div>
   );

@@ -15,7 +15,20 @@ model Store {
   address   String?
   openTime  String  @default("10:00")
   closeTime String  @default("20:00")
-  staff     Staff[]
+
+  // 打卡限制。clockMode: ANY 不限制 | IP 限店內網路 | GPS 限店面位置
+  clockMode  String  @default("ANY")
+  allowedIps String? // 逗號分隔的允許 IP
+  latitude   Float?
+  longitude  Float?
+  radiusM    Int     @default(150) // GPS 允許半徑（公尺）
+
+  // 薪資規則
+  lateGraceMin        Int @default(5) // 遲到寬限（分鐘）
+  latePerMin          Int @default(10) // 遲到扣款（NT$/分鐘）
+  fullAttendanceBonus Int @default(1000) // 全勤獎金
+
+  staff Staff[]
 }
 
 // 員工（含管理者）。role: ADMIN | MANAGER | STAFF
@@ -39,6 +52,7 @@ model Staff {
   createdAt         DateTime      @default(now())
   timeRecords       TimeRecord[]
   shifts            Shift[]
+  leaves            Leave[]
   appointments      Appointment[]
   saleItems         SaleItem[]
   salesAsCashier    Sale[]        @relation("cashier")
@@ -57,7 +71,20 @@ model TimeRecord {
   @@index([staffId, workDate])
 }
 
-// 排班。shiftType: MORNING | EVENING | FULL | OFF
+// 請假。leaveType: PERSONAL 事假 | SICK 病假
+model Leave {
+  id        String  @id @default(cuid())
+  staffId   String
+  staff     Staff   @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  workDate  String // YYYY-MM-DD
+  leaveType String
+  days      Float   @default(1) // 1 = 全天、0.5 = 半天
+  note      String?
+
+  @@unique([staffId, workDate])
+}
+
+// 排班。shiftType: MORNING | EVENING | FULL | OFF | CUSTOM（自訂時間）
 model Shift {
   id        String @id @default(cuid())
   staffId   String
@@ -85,6 +112,17 @@ model Customer {
   appointments Appointment[]
   sales        Sale[]
   passes       CustomerPass[]
+  photos       CustomerPhoto[]
+}
+
+// 顧客施作紀錄照片
+model CustomerPhoto {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  fileName   String // 儲存於 uploads/ 的檔名
+  caption    String?
+  createdAt  DateTime @default(now())
 }
 
 // 療程券 / 堂數券（例：臉部護理 10 堂）

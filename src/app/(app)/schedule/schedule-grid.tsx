@@ -5,18 +5,29 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { SHIFT_TYPES } from "@/lib/constants";
+import { useToast } from "@/hooks/use-toast";
 
-const ORDER = ["FULL", "MORNING", "EVENING", "OFF"];
+const PRESETS = ["FULL", "MORNING", "EVENING", "OFF"];
 const STYLE: Record<string, string> = {
   FULL: "bg-primary/15 text-primary border-primary/30",
   MORNING: "bg-sky-100 text-sky-700 border-sky-200",
   EVENING: "bg-violet-100 text-violet-700 border-violet-200",
+  CUSTOM: "bg-emerald-100 text-emerald-700 border-emerald-200",
   OFF: "bg-muted text-muted-foreground border-transparent",
 };
 
 type StaffRow = { id: string; name: string; title: string | null; color: string };
-type ShiftMap = Record<string, string>; // `${staffId}:${date}` -> shiftType
+type ShiftCell = { shiftType: string; startTime: string; endTime: string };
+type ShiftMap = Record<string, ShiftCell>; // `${staffId}:${date}`
 
 export function ScheduleGrid({
   staffList,
@@ -34,24 +45,50 @@ export function ScheduleGrid({
   todayStr: string;
 }) {
   const router = useRouter();
-  const [pending, setPending] = useState<string | null>(null);
+  const { toast } = useToast();
+  const [editing, setEditing] = useState<{ staff: StaffRow; date: string } | null>(null);
+  const [custom, setCustom] = useState({ start: "11:00", end: "19:00" });
+  const [loading, setLoading] = useState(false);
 
   const prevWeek = shiftWeek(weekStart, -7);
   const nextWeek = shiftWeek(weekStart, 7);
 
-  async function cycleShift(staffId: string, date: string) {
-    if (!canEdit) return;
-    const key = `${staffId}:${date}`;
-    const current = shifts[key] ?? "OFF";
-    const next = ORDER[(ORDER.indexOf(current) + 1) % ORDER.length];
-    setPending(key);
-    await fetch("/api/shifts", {
+  async function save(shiftType: string, startTime?: string, endTime?: string) {
+    if (!editing) return;
+    setLoading(true);
+    const res = await fetch("/api/shifts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ staffId, workDate: date, shiftType: next }),
+      body: JSON.stringify({
+        staffId: editing.staff.id,
+        workDate: editing.date,
+        shiftType,
+        startTime,
+        endTime,
+      }),
     });
-    setPending(null);
-    router.refresh();
+    setLoading(false);
+    if (res.ok) {
+      setEditing(null);
+      router.refresh();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      toast({ title: data.error ?? "儲存失敗", variant: "destructive" });
+    }
+  }
+
+  function cellLabel(cell?: ShiftCell) {
+    const type = cell?.shiftType ?? "OFF";
+    if (type === "OFF") return <>休假</>;
+    return (
+      <>
+        {type === "CUSTOM" ? "自訂" : SHIFT_TYPES[type].label}
+        <br />
+        <span className="font-normal opacity-80">
+          {cell!.startTime}-{cell!.endTime}
+        </span>
+      </>
+    );
   }
 
   return (
@@ -68,11 +105,10 @@ export function ScheduleGrid({
           </Link>
         </Button>
         <div className="ml-auto flex items-center gap-3 text-xs text-muted-foreground">
-          {ORDER.map((t) => (
+          {["FULL", "MORNING", "EVENING", "CUSTOM", "OFF"].map((t) => (
             <span key={t} className="flex items-center gap-1">
               <span className={`inline-block h-3 w-3 rounded border ${STYLE[t]}`} />
               {SHIFT_TYPES[t].label}
-              {SHIFT_TYPES[t].start && ` ${SHIFT_TYPES[t].start}-${SHIFT_TYPES[t].end}`}
             </span>
           ))}
         </div>
@@ -115,18 +151,24 @@ export function ScheduleGrid({
                   </span>
                 </td>
                 {weekDates.map((d) => {
-                  const key = `${s.id}:${d}`;
-                  const type = shifts[key] ?? "OFF";
+                  const cell = shifts[`${s.id}:${d}`];
+                  const type = cell?.shiftType ?? "OFF";
                   return (
                     <td key={d} className="px-1.5 py-1.5 text-center">
                       <button
-                        onClick={() => cycleShift(s.id, d)}
-                        disabled={!canEdit || pending === key}
-                        className={`w-full rounded-md border px-1 py-2 text-xs font-medium transition-opacity ${STYLE[type]} ${
+                        onClick={() => {
+                          if (!canEdit) return;
+                          if (cell?.shiftType === "CUSTOM") {
+                            setCustom({ start: cell.startTime, end: cell.endTime });
+                          }
+                          setEditing({ staff: s, date: d });
+                        }}
+                        disabled={!canEdit}
+                        className={`w-full rounded-md border px-1 py-1.5 text-xs font-medium leading-tight transition-opacity ${STYLE[type]} ${
                           canEdit ? "hover:opacity-70 cursor-pointer" : "cursor-default"
-                        } ${pending === key ? "opacity-40" : ""}`}
+                        }`}
                       >
-                        {SHIFT_TYPES[type].label}
+                        {cellLabel(cell)}
                       </button>
                     </td>
                   );
@@ -138,9 +180,59 @@ export function ScheduleGrid({
       </div>
       {canEdit && (
         <p className="text-xs text-muted-foreground">
-          點擊格子即可切換班別：全班 → 早班 → 晚班 → 休假
+          點擊格子選擇班別，或輸入自訂上下班時間
         </p>
       )}
+
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        <DialogContent className="sm:max-w-xs">
+          <DialogHeader>
+            <DialogTitle>
+              {editing?.staff.name}・{editing?.date.slice(5)} 排班
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-2">
+            {PRESETS.map((t) => (
+              <button
+                key={t}
+                disabled={loading}
+                onClick={() => save(t)}
+                className={`rounded-md border px-2 py-2.5 text-sm font-medium hover:opacity-70 ${STYLE[t]}`}
+              >
+                {SHIFT_TYPES[t].label}
+                {SHIFT_TYPES[t].start && (
+                  <span className="block text-xs font-normal opacity-80">
+                    {SHIFT_TYPES[t].start}-{SHIFT_TYPES[t].end}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+          <div className="border-t pt-3 space-y-2">
+            <Label className="text-sm">自訂時間</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="time"
+                value={custom.start}
+                onChange={(e) => setCustom((c) => ({ ...c, start: e.target.value }))}
+              />
+              <span className="text-muted-foreground">～</span>
+              <Input
+                type="time"
+                value={custom.end}
+                onChange={(e) => setCustom((c) => ({ ...c, end: e.target.value }))}
+              />
+            </div>
+            <Button
+              className="w-full"
+              disabled={loading}
+              onClick={() => save("CUSTOM", custom.start, custom.end)}
+            >
+              套用自訂班別
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

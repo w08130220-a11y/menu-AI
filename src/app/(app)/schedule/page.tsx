@@ -41,8 +41,14 @@ export default async function SchedulePage({
     }),
   ]);
 
-  const shiftMap: Record<string, string> = {};
-  for (const s of shifts) shiftMap[`${s.staffId}:${s.workDate}`] = s.shiftType;
+  const shiftMap: Record<string, { shiftType: string; startTime: string; endTime: string }> = {};
+  for (const s of shifts) {
+    shiftMap[`${s.staffId}:${s.workDate}`] = {
+      shiftType: s.shiftType,
+      startTime: s.startTime,
+      endTime: s.endTime,
+    };
+  }
 
   return (
     <div className="space-y-6">

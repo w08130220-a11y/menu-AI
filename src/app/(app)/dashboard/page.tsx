@@ -65,6 +65,23 @@ export default async function DashboardPage() {
     prisma.product.findMany({ where: { active: true } }),
   ]);
 
+  // 今日上班人員：排班（非休假）＋ 打卡狀態
+  const [todayShifts, todayRecords] = await Promise.all([
+    prisma.shift.findMany({
+      where: { workDate: todayStr, shiftType: { not: "OFF" }, staff: { active: true, ...staffStore } },
+      include: { staff: { select: { id: true, name: true, title: true, color: true } } },
+      orderBy: { startTime: "asc" },
+    }),
+    prisma.timeRecord.findMany({ where: { workDate: todayStr } }),
+  ]);
+  const onDuty = todayShifts.map((s) => {
+    const rec = todayRecords.filter((r) => r.staffId === s.staffId).at(-1);
+    return {
+      ...s,
+      status: !rec ? "NOT_IN" : rec.clockOut ? "DONE" : "WORKING",
+    };
+  });
+
   // 近 14 天營收趨勢
   const trend: { label: string; total: number }[] = [];
   for (let i = 13; i >= 0; i--) {
@@ -145,6 +162,50 @@ export default async function DashboardPage() {
           sub={`本月新客 ${monthNewCustomers} 位`}
         />
       </div>
+
+      <Card>
+        <CardHeader className="pb-2 flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-base">今日上班人員（{onDuty.length} 位排班）</CardTitle>
+          <Link href="/schedule" className="text-sm text-primary hover:underline">
+            排班表 →
+          </Link>
+        </CardHeader>
+        <CardContent>
+          {onDuty.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-2">今天沒有人排班</p>
+          ) : (
+            <div className="flex flex-wrap gap-2.5">
+              {onDuty.map((s) => (
+                <div key={s.id} className="flex items-center gap-2.5 rounded-lg border px-3 py-2">
+                  <span
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold text-white"
+                    style={{ background: s.staff.color }}
+                  >
+                    {s.staff.name.slice(0, 1)}
+                  </span>
+                  <div className="text-sm leading-tight">
+                    <p className="font-medium">{s.staff.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {s.startTime}-{s.endTime}
+                    </p>
+                  </div>
+                  <span
+                    className={`ml-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+                      s.status === "WORKING"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : s.status === "DONE"
+                          ? "bg-gray-100 text-gray-500"
+                          : "bg-yellow-100 text-yellow-800"
+                    }`}
+                  >
+                    {s.status === "WORKING" ? "上班中" : s.status === "DONE" ? "已下班" : "未打卡"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2">
