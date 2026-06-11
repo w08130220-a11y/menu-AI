@@ -16,6 +16,10 @@ model Store {
   openTime  String  @default("10:00")
   closeTime String  @default("20:00")
 
+  // LINE 官方帳號串接（商家自有 OA 的 Messaging API 金鑰）
+  lineChannelAccessToken String?
+  lineChannelSecret      String?
+
   // 打卡限制。clockMode: ANY 不限制 | IP 限店內網路 | GPS 限店面位置
   clockMode  String  @default("ANY")
   allowedIps String? // 逗號分隔的允許 IP
@@ -109,6 +113,7 @@ model Customer {
   birthday     String? // YYYY-MM-DD
   note         String? // 過敏注意、偏好設計師、髮況等
   tags         String? // 逗號分隔：VIP,染燙客,敏感肌
+  lineUserId   String? // LINE 綁定（顧客加官方帳號好友後傳手機號碼完成）
   balance      Int            @default(0) // 儲值金餘額
   createdAt    DateTime       @default(now())
   appointments Appointment[]

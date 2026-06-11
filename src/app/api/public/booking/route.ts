@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
-import { sendSms, bookingReceivedMessage } from "@/lib/notify";
+import { sendLine, bookingReceivedMessage } from "@/lib/notify";
 
 const bookingSchema = z.object({
   serviceId: z.string().min(1).max(64),
@@ -94,9 +94,10 @@ export async function POST(request: Request) {
     include: { staff: true, service: true },
   });
 
-  // 預約受理通知（簡訊；未設定金鑰時記錄為模擬發送）
-  await sendSms({
-    to: phone,
+  // 預約受理通知（LINE；分店未設定金鑰時記錄為模擬發送）
+  await sendLine({
+    customer,
+    store: staffMember.store,
     kind: "BOOKING_RECEIVED",
     appointmentId: appointment.id,
     message: bookingReceivedMessage({

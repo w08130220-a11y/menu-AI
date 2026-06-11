@@ -122,7 +122,7 @@ export function BookingClient({
         <p className="text-muted-foreground mb-6">
           {needDeposit
             ? `此服務需支付訂金 ${fmtMoney(done.depositAmount)}，付款後預約立即成立（可於結帳時折抵）。`
-            : "已發送簡訊通知，門市確認後預約即生效。"}
+            : "門市確認後預約即生效；加入店家 LINE 官方帳號可接收預約通知。"}
         </p>
         <div className="rounded-lg border bg-card p-5 text-left space-y-2 text-sm">
           <Row label="店家" value={store?.name ?? ""} />
@@ -375,7 +375,9 @@ export function BookingClient({
               maxLength={20}
               required
             />
-            <p className="text-xs text-muted-foreground">預約通知與提醒將以簡訊發送至此號碼</p>
+            <p className="text-xs text-muted-foreground">
+              加入店家 LINE 官方帳號並傳送此號碼，即可收到預約確認與提醒通知
+            </p>
           </div>
           <div className="space-y-1.5">
             <Label>備註（選填）</Label>

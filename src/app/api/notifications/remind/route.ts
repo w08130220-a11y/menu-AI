@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession, isManager } from "@/lib/session";
-import { sendSms, reminderMessage } from "@/lib/notify";
+import { sendLine, reminderMessage } from "@/lib/notify";
 
 const ymd = (d: Date) => {
   const z = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
@@ -37,8 +37,9 @@ export async function POST(request: Request) {
   let sent = 0;
   for (const a of appointments) {
     if (a.notifications.length > 0) continue; // 已提醒過，不重複發送
-    await sendSms({
-      to: a.customer.phone,
+    await sendLine({
+      customer: a.customer,
+      store: a.staff.store,
       kind: "REMINDER",
       appointmentId: a.id,
       message: reminderMessage({

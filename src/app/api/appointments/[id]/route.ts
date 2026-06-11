@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { APPOINTMENT_STATUS } from "@/lib/constants";
-import { sendSms, bookingConfirmedMessage } from "@/lib/notify";
+import { sendLine, bookingConfirmedMessage } from "@/lib/notify";
 
 export async function PATCH(
   request: Request,
@@ -29,10 +29,11 @@ export async function PATCH(
     },
   });
 
-  // 由「待確認」變更為「已確認」→ 發送確認通知
+  // 由「待確認」變更為「已確認」→ 發送 LINE 確認通知
   if (before.status === "PENDING" && status === "CONFIRMED") {
-    await sendSms({
-      to: updated.customer.phone,
+    await sendLine({
+      customer: updated.customer,
+      store: updated.staff.store,
       kind: "BOOKING_CONFIRMED",
       appointmentId: updated.id,
       message: bookingConfirmedMessage({

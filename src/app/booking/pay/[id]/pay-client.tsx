@@ -30,7 +30,7 @@ export function PayClient({
       <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-5 text-center">
         <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-600 mb-2" />
         <p className="font-bold text-emerald-700">付款完成，預約已確認！</p>
-        <p className="text-sm text-emerald-700/80 mt-1">已發送簡訊通知，期待您的光臨。</p>
+        <p className="text-sm text-emerald-700/80 mt-1">已發送 LINE 通知，期待您的光臨。</p>
       </div>
     );
   }

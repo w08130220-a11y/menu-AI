@@ -1,36 +1,38 @@
 import { prisma } from "@/lib/prisma";
+import { linePush } from "@/lib/line";
 
-// 通知發送抽象層：
-// - 設定 SMS_API_URL / SMS_API_KEY 即透過簡訊閘道（三竹、every8d、Twilio webhook 皆可）實送
-// - 設定 LINE_CHANNEL_ACCESS_TOKEN 即透過 LINE Messaging API 實送（需顧客 LINE userId）
-// - 未設定時以 SIMULATED 記錄到資料庫，介面照常顯示，正式環境填入金鑰即可切換
+// LINE 通知發送：
+// - 分店已設定 LINE 官方帳號金鑰且顧客已綁定 → 透過商家 OA 實際推播
+// - 顧客未綁定 LINE → 記錄 NOT_BOUND（顧客加官方帳號好友並傳手機號碼即完成綁定）
+// - 分店未設定金鑰 → 記錄 SIMULATED（介面照常顯示內容，填入金鑰即切換為實送）
 export type NotifyKind = "BOOKING_RECEIVED" | "BOOKING_CONFIRMED" | "REMINDER" | "DEPOSIT_PAID";
 
-export async function sendSms(opts: {
-  to: string;
+export async function sendLine(opts: {
+  customer: { id: string; phone: string; lineUserId: string | null };
+  store: { lineChannelAccessToken: string | null };
   message: string;
   kind: NotifyKind;
   appointmentId?: string;
 }) {
   let status = "SIMULATED";
-  const url = process.env.SMS_API_URL;
-  const key = process.env.SMS_API_KEY;
-  if (url && key) {
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-        body: JSON.stringify({ to: opts.to, text: opts.message }),
-      });
-      status = res.ok ? "SENT" : "FAILED";
-    } catch {
-      status = "FAILED";
+  const token = opts.store.lineChannelAccessToken;
+  if (token) {
+    if (!opts.customer.lineUserId) {
+      status = "NOT_BOUND";
+    } else {
+      try {
+        status = (await linePush(token, opts.customer.lineUserId, opts.message))
+          ? "SENT"
+          : "FAILED";
+      } catch {
+        status = "FAILED";
+      }
     }
   }
   await prisma.notification.create({
     data: {
-      channel: "SMS",
-      recipient: opts.to,
+      channel: "LINE",
+      recipient: opts.customer.phone,
       message: opts.message,
       status,
       kind: opts.kind,

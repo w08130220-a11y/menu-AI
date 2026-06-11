@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
-import { sendSms, depositPaidMessage } from "@/lib/notify";
+import { sendLine, depositPaidMessage } from "@/lib/notify";
 
 // 訂金付款（示範閘道）。
 // 正式環境串接綠界 ECPay / 藍新 NewebPay / Stripe 時：
@@ -39,8 +39,9 @@ export async function POST(
     },
   });
 
-  await sendSms({
-    to: appointment.customer.phone,
+  await sendLine({
+    customer: appointment.customer,
+    store: appointment.staff.store,
     kind: "DEPOSIT_PAID",
     appointmentId: appointment.id,
     message: depositPaidMessage({

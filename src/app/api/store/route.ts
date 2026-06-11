@@ -29,6 +29,12 @@ export async function PATCH(request: Request) {
       ...(body.lateGraceMin !== undefined && { lateGraceMin: Math.max(0, Number(body.lateGraceMin) || 0) }),
       ...(body.latePerMin !== undefined && { latePerMin: Math.max(0, Number(body.latePerMin) || 0) }),
       ...(body.fullAttendanceBonus !== undefined && { fullAttendanceBonus: Math.max(0, Number(body.fullAttendanceBonus) || 0) }),
+      ...(body.lineChannelAccessToken !== undefined && {
+        lineChannelAccessToken: String(body.lineChannelAccessToken).trim() || null,
+      }),
+      ...(body.lineChannelSecret !== undefined && {
+        lineChannelSecret: String(body.lineChannelSecret).trim() || null,
+      }),
     },
   });
   return NextResponse.json({ id: updated.id });

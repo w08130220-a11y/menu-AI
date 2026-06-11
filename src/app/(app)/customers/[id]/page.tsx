@@ -87,6 +87,15 @@ export default async function CustomerDetailPage({
               <span className="inline-flex items-center gap-1">
                 <Phone className="h-3.5 w-3.5" /> {customer.phone}
               </span>
+              <span
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs ${
+                  customer.lineUserId
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
+                {customer.lineUserId ? "已綁定 LINE" : "未綁定 LINE"}
+              </span>
               {customer.email && (
                 <span className="inline-flex items-center gap-1">
                   <Mail className="h-3.5 w-3.5" /> {customer.email}

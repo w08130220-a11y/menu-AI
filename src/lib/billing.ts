@@ -5,9 +5,9 @@ export const TIERS = {
   BASIC: {
     label: "基礎",
     monthly: 399,
-    staffLimit: 2, // 主帳號另計
+    staffLimit: 5, // 主帳號另計
     storeLimit: 1, // 單一門市（無分店）
-    desc: "主帳號＋2 位員工・單一門市",
+    desc: "主帳號＋5 位員工・單一門市",
   },
   PLUS: {
     label: "進階",

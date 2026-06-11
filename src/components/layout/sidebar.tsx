@@ -42,7 +42,7 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
       { key: "appointments", href: "/appointments", label: "預約管理", icon: CalendarDays },
       { key: "pos", href: "/pos", label: "POS 收款", icon: ShoppingCart },
       { key: "clock", href: "/clock", label: "上下班打卡", icon: Clock },
-      { key: "notifications", href: "/notifications", label: "通知紀錄", icon: BellRing, managerOnly: true },
+      { key: "notifications", href: "/notifications", label: "LINE 通知", icon: BellRing, managerOnly: true },
     ],
   },
   {
