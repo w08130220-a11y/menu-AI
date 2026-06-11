@@ -32,6 +32,10 @@ export async function POST(request: Request) {
       serviceCommission: Number(serviceCommission) || 0,
       productCommission: Number(productCommission) || 0,
       color: color || "#f97316",
+      // 頁籤權限僅主帳號可設定
+      ...(me.role === "ADMIN" && Array.isArray(body.permissions)
+        ? { permissions: body.permissions.join(",") }
+        : {}),
     },
   });
   return NextResponse.json({ id: staff.id });

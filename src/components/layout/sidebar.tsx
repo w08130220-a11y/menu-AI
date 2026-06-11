@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { ROLES } from "@/lib/constants";
 
 type NavItem = {
+  key: string;
   href: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -35,32 +36,32 @@ const NAV_GROUPS: { title: string; items: NavItem[] }[] = [
   {
     title: "日常營運",
     items: [
-      { href: "/dashboard", label: "儀表板", icon: LayoutDashboard },
-      { href: "/appointments", label: "預約管理", icon: CalendarDays },
-      { href: "/pos", label: "POS 收款", icon: ShoppingCart },
-      { href: "/clock", label: "上下班打卡", icon: Clock },
-      { href: "/notifications", label: "通知紀錄", icon: BellRing, managerOnly: true },
+      { key: "dashboard", href: "/dashboard", label: "儀表板", icon: LayoutDashboard },
+      { key: "appointments", href: "/appointments", label: "預約管理", icon: CalendarDays },
+      { key: "pos", href: "/pos", label: "POS 收款", icon: ShoppingCart },
+      { key: "clock", href: "/clock", label: "上下班打卡", icon: Clock },
+      { key: "notifications", href: "/notifications", label: "通知紀錄", icon: BellRing, managerOnly: true },
     ],
   },
   {
     title: "顧客",
-    items: [{ href: "/customers", label: "顧客管理", icon: Users }],
+    items: [{ key: "customers", href: "/customers", label: "顧客管理", icon: Users }],
   },
   {
     title: "團隊",
     items: [
-      { href: "/schedule", label: "員工排班", icon: CalendarRange },
-      { href: "/performance", label: "業績紀錄", icon: TrendingUp },
-      { href: "/payroll", label: "薪資計算", icon: Wallet },
-      { href: "/staff", label: "員工管理", icon: UserCog, managerOnly: true },
+      { key: "schedule", href: "/schedule", label: "員工排班", icon: CalendarRange },
+      { key: "performance", href: "/performance", label: "業績紀錄", icon: TrendingUp },
+      { key: "payroll", href: "/payroll", label: "薪資計算", icon: Wallet },
+      { key: "staff", href: "/staff", label: "員工管理", icon: UserCog, managerOnly: true },
     ],
   },
   {
     title: "店務設定",
     items: [
-      { href: "/reports", label: "跨店報表", icon: BarChart3, managerOnly: true },
-      { href: "/services", label: "服務項目", icon: Scissors, managerOnly: true },
-      { href: "/inventory", label: "產品庫存", icon: Package, managerOnly: true },
+      { key: "reports", href: "/reports", label: "跨店報表", icon: BarChart3, managerOnly: true },
+      { key: "services", href: "/services", label: "服務項目", icon: Scissors, managerOnly: true },
+      { key: "inventory", href: "/inventory", label: "產品庫存", icon: Package, managerOnly: true },
     ],
   },
 ];
@@ -69,10 +70,12 @@ export function Sidebar({
   staff,
   stores,
   activeStoreId,
+  allowed,
 }: {
   staff: { name: string; role: string; title: string | null; storeName: string };
   stores: { id: string; name: string }[];
   activeStoreId: string | null;
+  allowed: string[];
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -124,7 +127,11 @@ export function Sidebar({
 
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
         {NAV_GROUPS.map((group) => {
-          const items = group.items.filter((i) => !i.managerOnly || manager);
+          const items = group.items.filter((i) => {
+            if (i.managerOnly) return manager;
+            if (i.key === "clock") return true;
+            return manager || allowed.includes(i.key);
+          });
           if (items.length === 0) return null;
           return (
             <div key={group.title}>

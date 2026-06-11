@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession, isManager } from "@/lib/session";
 import { getActiveStoreId } from "@/lib/store-context";
+import { canAccess } from "@/lib/permissions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { fmtMoney } from "@/lib/constants";
@@ -28,6 +29,7 @@ export default async function PayrollPage({
 }) {
   const me = await getSession();
   if (!me) redirect("/login");
+  if (!canAccess(me, "payroll")) redirect("/clock");
   const params = await searchParams;
 
   const now = new Date();

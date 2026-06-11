@@ -99,6 +99,16 @@ export async function POST(request: Request) {
         where: { id: customerId },
         data: { balance: { decrement: total } },
       });
+      await tx.balanceTransaction.create({
+        data: {
+          customerId,
+          staffId: me.id,
+          amount: -total,
+          kind: "SPEND",
+          note: "POS 結帳折抵",
+          saleId: created.id,
+        },
+      });
     }
     return created;
   });

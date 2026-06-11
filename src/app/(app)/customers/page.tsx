@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/session";
+import { canAccess } from "@/lib/permissions";
 import { Card, CardContent } from "@/components/ui/card";
 import { fmtMoney } from "@/lib/constants";
 import { CustomerDialog } from "./customer-dialog";
@@ -11,6 +14,9 @@ export default async function CustomersPage({
 }: {
   searchParams: Promise<{ q?: string }>;
 }) {
+  const me = await getSession();
+  if (!me) redirect("/login");
+  if (!canAccess(me, "customers")) redirect("/clock");
   const { q } = await searchParams;
 
   const customers = await prisma.customer.findMany({

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession, isManager } from "@/lib/session";
 import { getActiveStoreId } from "@/lib/store-context";
+import { canAccess } from "@/lib/permissions";
 import { ScheduleGrid } from "./schedule-grid";
 
 const toYmd = (d: Date) => {
@@ -16,6 +17,7 @@ export default async function SchedulePage({
 }) {
   const me = await getSession();
   if (!me) redirect("/login");
+  if (!canAccess(me, "schedule")) redirect("/clock");
   const { week } = await searchParams;
 
   const base = week ? new Date(`${week}T00:00:00`) : new Date();

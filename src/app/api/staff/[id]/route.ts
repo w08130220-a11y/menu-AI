@@ -34,6 +34,10 @@ export async function PATCH(
       ...(body.productCommission !== undefined && { productCommission: Number(body.productCommission) || 0 }),
       ...(body.color !== undefined && { color: body.color }),
       ...(body.active !== undefined && target.role !== "ADMIN" && { active: !!body.active }),
+      // 頁籤權限僅主帳號可設定；空陣列存為僅打卡，null 表示恢復預設
+      ...(me.role === "ADMIN" && body.permissions !== undefined
+        ? { permissions: Array.isArray(body.permissions) ? body.permissions.join(",") : null }
+        : {}),
       ...(body.password ? { password: hashPassword(body.password) } : {}),
     },
   });

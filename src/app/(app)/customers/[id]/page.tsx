@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getSession, isManager } from "@/lib/session";
+import { canAccess } from "@/lib/permissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   fmtMoney,
@@ -8,33 +10,56 @@ import {
   PAYMENT_METHODS,
 } from "@/lib/constants";
 import { CustomerDialog } from "../customer-dialog";
-import { TopupDialog, AddPassDialog, UsePassButton } from "./customer-actions";
+import {
+  TopupDialog,
+  AddPassDialog,
+  UsePassButton,
+  DeleteBalanceTxButton,
+} from "./customer-actions";
 import { PhotoSection } from "./photo-section";
 import { ArrowLeft, Cake, Phone, Mail } from "lucide-react";
+
+const TX_KIND: Record<string, { label: string; cls: string }> = {
+  TOPUP: { label: "儲值", cls: "bg-emerald-100 text-emerald-700" },
+  SPEND: { label: "消費折抵", cls: "bg-sky-100 text-sky-700" },
+  ADJUST: { label: "人工調整", cls: "bg-amber-100 text-amber-700" },
+};
 
 export default async function CustomerDetailPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const me = await getSession();
+  if (!me) redirect("/login");
+  if (!canAccess(me, "customers")) redirect("/clock");
+
   const { id } = await params;
-  const customer = await prisma.customer.findUnique({
-    where: { id },
-    include: {
-      passes: { orderBy: { createdAt: "desc" } },
-      photos: { orderBy: { createdAt: "desc" } },
-      sales: {
-        include: { items: true },
-        orderBy: { createdAt: "desc" },
-        take: 20,
+  const [customer, passTemplates] = await Promise.all([
+    prisma.customer.findUnique({
+      where: { id },
+      include: {
+        passes: { orderBy: { createdAt: "desc" } },
+        photos: { orderBy: { createdAt: "desc" } },
+        balanceTxs: {
+          include: { staff: { select: { name: true } } },
+          orderBy: { createdAt: "desc" },
+          take: 30,
+        },
+        sales: {
+          include: { items: true },
+          orderBy: { createdAt: "desc" },
+          take: 20,
+        },
+        appointments: {
+          include: { service: true, staff: true },
+          orderBy: { startAt: "desc" },
+          take: 10,
+        },
       },
-      appointments: {
-        include: { service: true, staff: true },
-        orderBy: { startAt: "desc" },
-        take: 10,
-      },
-    },
-  });
+    }),
+    prisma.passTemplate.findMany({ where: { active: true }, orderBy: { name: "asc" } }),
+  ]);
   if (!customer) notFound();
 
   const totalSpent = customer.sales.reduce((a, s) => a + s.total, 0);
@@ -77,7 +102,7 @@ export default async function CustomerDetailPage({
           <div className="flex gap-2">
             <CustomerDialog customer={customer} />
             <TopupDialog customerId={customer.id} />
-            <AddPassDialog customerId={customer.id} />
+            <AddPassDialog customerId={customer.id} templates={passTemplates} />
           </div>
         </div>
       </div>
@@ -116,6 +141,48 @@ export default async function CustomerDetailPage({
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">儲值金異動紀錄</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {customer.balanceTxs.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-2">尚無儲值金異動</p>
+          ) : (
+            <div className="divide-y">
+              {customer.balanceTxs.map((tx) => {
+                const kind = TX_KIND[tx.kind] ?? TX_KIND.ADJUST;
+                return (
+                  <div key={tx.id} className="flex items-center gap-3 py-2.5 text-sm">
+                    <span className="text-muted-foreground font-mono text-xs w-24 shrink-0">
+                      {tx.createdAt.toLocaleString("zh-TW", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false })}
+                    </span>
+                    <span className={`rounded-full px-2 py-0.5 text-xs shrink-0 ${kind.cls}`}>
+                      {kind.label}
+                    </span>
+                    <span className="text-muted-foreground shrink-0">
+                      操作：{tx.staff?.name ?? "系統"}
+                    </span>
+                    {tx.note && (
+                      <span className="text-xs text-muted-foreground truncate">{tx.note}</span>
+                    )}
+                    <span
+                      className={`ml-auto font-mono font-medium shrink-0 ${tx.amount > 0 ? "text-emerald-600" : "text-destructive"}`}
+                    >
+                      {tx.amount > 0 ? "+" : "-"}
+                      {fmtMoney(Math.abs(tx.amount))}
+                    </span>
+                    {isManager(me) && tx.kind !== "SPEND" && (
+                      <DeleteBalanceTxButton txId={tx.id} />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader className="pb-2">

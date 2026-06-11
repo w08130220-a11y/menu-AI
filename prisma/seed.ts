@@ -16,6 +16,8 @@ const at = (date: Date, h: number, m = 0) => {
 
 async function main() {
   await prisma.notification.deleteMany();
+  await prisma.balanceTransaction.deleteMany();
+  await prisma.passTemplate.deleteMany();
   await prisma.saleItem.deleteMany();
   await prisma.sale.deleteMany();
   await prisma.appointment.deleteMany();
@@ -93,6 +95,14 @@ async function main() {
   ];
   const products: { id: string; name: string; price: number }[] = [];
   for (const p of productsData) products.push(await prisma.product.create({ data: p }));
+
+  const passTemplatesData = [
+    { name: "深層護膚 10 堂", totalSessions: 10, validDays: 365, price: 15000 },
+    { name: "全身精油按摩 10 堂", totalSessions: 10, validDays: 365, price: 19800 },
+    { name: "頭皮護理 5 堂", totalSessions: 5, validDays: 180, price: 6500 },
+    { name: "肩頸紓壓 8 堂", totalSessions: 8, validDays: 180, price: 9900 },
+  ];
+  for (const t of passTemplatesData) await prisma.passTemplate.create({ data: t });
 
   const customersData = [
     { name: "林小芳", phone: "0912-345-678", gender: "F", birthday: "1992-03-15", tags: "VIP,染燙客", note: "偏好自然棕色系，對 PPD 染劑輕微過敏", balance: 3000 },

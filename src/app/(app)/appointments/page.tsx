@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/session";
 import { getActiveStoreId } from "@/lib/store-context";
+import { canAccess } from "@/lib/permissions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +32,7 @@ export default async function AppointmentsPage({
 }) {
   const me = await getSession();
   if (!me) redirect("/login");
+  if (!canAccess(me, "appointments")) redirect("/clock");
   const storeId = await getActiveStoreId(me);
   const staffStore = storeId ? { storeId } : {};
 

@@ -12,17 +12,30 @@ export async function PATCH(
   const { id } = await params;
   const body = await request.json();
 
-  // 儲值（正數）或扣款（負數）
+  // 儲值（正數）或扣款（負數），並記錄操作人員
   if (typeof body.balanceDelta === "number") {
+    const delta = Math.trunc(body.balanceDelta);
+    if (delta === 0) return NextResponse.json({ error: "金額不可為 0" }, { status: 400 });
     const customer = await prisma.customer.findUnique({ where: { id } });
     if (!customer) return NextResponse.json({ error: "找不到顧客" }, { status: 404 });
-    if (customer.balance + body.balanceDelta < 0) {
+    if (customer.balance + delta < 0) {
       return NextResponse.json({ error: "儲值金餘額不足" }, { status: 400 });
     }
-    const updated = await prisma.customer.update({
-      where: { id },
-      data: { balance: { increment: body.balanceDelta } },
-    });
+    const [updated] = await prisma.$transaction([
+      prisma.customer.update({
+        where: { id },
+        data: { balance: { increment: delta } },
+      }),
+      prisma.balanceTransaction.create({
+        data: {
+          customerId: id,
+          staffId: me.id,
+          amount: delta,
+          kind: delta > 0 ? "TOPUP" : "ADJUST",
+          note: typeof body.note === "string" ? body.note.slice(0, 100) || null : null,
+        },
+      }),
+    ]);
     return NextResponse.json(updated);
   }
 

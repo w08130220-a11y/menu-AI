@@ -25,7 +25,7 @@ export default async function StaffPage() {
           <h1 className="text-2xl font-bold">員工管理</h1>
           <p className="text-muted-foreground text-sm">帳號、角色與薪資制度設定</p>
         </div>
-        <StaffDialog />
+        <StaffDialog canSetPermissions={me.role === "ADMIN"} />
       </div>
 
       <Card>
@@ -75,7 +75,7 @@ export default async function StaffPage() {
                     )}
                   </td>
                   <td className="py-3 text-right">
-                    <StaffDialog staff={s} />
+                    <StaffDialog staff={s} canSetPermissions={me.role === "ADMIN"} />
                   </td>
                 </tr>
               ))}

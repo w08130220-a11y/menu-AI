@@ -48,6 +48,7 @@ model Staff {
   serviceCommission Float         @default(0.1) // 服務業績抽成
   productCommission Float         @default(0.05) // 產品銷售抽成
   color             String        @default("#f97316") // 排班 / 行事曆顯示色
+  permissions       String? // 員工可見頁籤（逗號分隔；null = 預設全部開放）
   active            Boolean       @default(true)
   createdAt         DateTime      @default(now())
   timeRecords       TimeRecord[]
@@ -56,6 +57,7 @@ model Staff {
   appointments      Appointment[]
   saleItems         SaleItem[]
   salesAsCashier    Sale[]        @relation("cashier")
+  balanceTxs        BalanceTransaction[]
 }
 
 // 打卡紀錄
@@ -113,6 +115,31 @@ model Customer {
   sales        Sale[]
   passes       CustomerPass[]
   photos       CustomerPhoto[]
+  balanceTxs   BalanceTransaction[]
+}
+
+// 儲值金異動紀錄。kind: TOPUP 儲值 | SPEND 消費折抵 | ADJUST 人工調整
+model BalanceTransaction {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  staffId    String? // 操作人員
+  staff      Staff?   @relation(fields: [staffId], references: [id], onDelete: SetNull)
+  amount     Int // 正數加值、負數扣款
+  kind       String   @default("TOPUP")
+  note       String?
+  saleId     String?
+  createdAt  DateTime @default(now())
+}
+
+// 療程券方案（先建立方案，開券時從下拉選單選擇）
+model PassTemplate {
+  id            String  @id @default(cuid())
+  name          String
+  totalSessions Int
+  validDays     Int     @default(180)
+  price         Int     @default(0)
+  active        Boolean @default(true)
 }
 
 // 顧客施作紀錄照片

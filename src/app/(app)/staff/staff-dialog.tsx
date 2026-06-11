@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { STAFF_PAGES } from "@/lib/permissions";
 
 type StaffInput = {
   id?: string;
@@ -28,9 +29,16 @@ type StaffInput = {
   serviceCommission: number | string;
   productCommission: number | string;
   color: string;
+  permissions?: string | null;
 };
 
-export function StaffDialog({ staff }: { staff?: StaffInput }) {
+export function StaffDialog({
+  staff,
+  canSetPermissions = false,
+}: {
+  staff?: StaffInput;
+  canSetPermissions?: boolean;
+}) {
   const router = useRouter();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -50,6 +58,11 @@ export function StaffDialog({ staff }: { staff?: StaffInput }) {
     productCommission: String(staff ? Number(staff.productCommission) * 100 : 5) as string | number,
     color: staff?.color ?? "#f97316",
   });
+  const [permissions, setPermissions] = useState<string[]>(
+    staff?.permissions != null
+      ? staff.permissions.split(",").filter(Boolean)
+      : STAFF_PAGES.map((p) => p.key)
+  );
 
   const isAdmin = staff?.role === "ADMIN";
 
@@ -61,6 +74,7 @@ export function StaffDialog({ staff }: { staff?: StaffInput }) {
       serviceCommission: Number(form.serviceCommission) / 100,
       productCommission: Number(form.productCommission) / 100,
       password: form.password || undefined,
+      ...(canSetPermissions && form.role === "STAFF" ? { permissions } : {}),
     };
     const res = await fetch(isEdit ? `/api/staff/${staff!.id}` : "/api/staff", {
       method: isEdit ? "PATCH" : "POST",
@@ -186,6 +200,47 @@ export function StaffDialog({ staff }: { staff?: StaffInput }) {
               </div>
             </div>
           </div>
+
+          {canSetPermissions && form.role === "STAFF" && (
+            <div className="rounded-md border p-3 space-y-2">
+              <Label className="font-bold">頁籤權限（主帳號設定）</Label>
+              <p className="text-xs text-muted-foreground">
+                勾選此員工可使用的頁面；「上下班打卡」一律開放
+              </p>
+              <div className="grid grid-cols-2 gap-1.5">
+                {STAFF_PAGES.map((p) => (
+                  <label
+                    key={p.key}
+                    className="flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-sm cursor-pointer hover:bg-muted"
+                  >
+                    <input
+                      type="checkbox"
+                      className="accent-primary"
+                      checked={permissions.includes(p.key)}
+                      onChange={(e) =>
+                        setPermissions((prev) =>
+                          e.target.checked
+                            ? [...prev, p.key]
+                            : prev.filter((k) => k !== p.key)
+                        )
+                      }
+                    />
+                    {p.label}
+                  </label>
+                ))}
+              </div>
+              <div className="flex gap-2 text-xs">
+                <button type="button" className="text-primary hover:underline"
+                  onClick={() => setPermissions(STAFF_PAGES.map((p) => p.key))}>
+                  全選
+                </button>
+                <button type="button" className="text-muted-foreground hover:underline"
+                  onClick={() => setPermissions([])}>
+                  全部取消（僅可打卡）
+                </button>
+              </div>
+            </div>
+          )}
 
           <Button type="submit" className="w-full" disabled={loading}>
             儲存

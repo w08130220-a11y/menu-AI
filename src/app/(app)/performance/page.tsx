@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getSession, isManager } from "@/lib/session";
 import { getActiveStoreId } from "@/lib/store-context";
+import { canAccess } from "@/lib/permissions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { fmtMoney } from "@/lib/constants";
@@ -26,6 +27,7 @@ export default async function PerformancePage({
 }) {
   const me = await getSession();
   if (!me) redirect("/login");
+  if (!canAccess(me, "performance")) redirect("/clock");
   const params = await searchParams;
 
   const now = new Date();

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/session";
 import { getActiveStoreId, getStores } from "@/lib/store-context";
+import { allowedPages } from "@/lib/permissions";
 import { Sidebar } from "@/components/layout/sidebar";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -27,6 +28,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         }}
         stores={stores.map((s) => ({ id: s.id, name: s.name }))}
         activeStoreId={activeStoreId}
+        allowed={allowedPages(staff)}
       />
       <main className="flex-1 overflow-x-hidden px-6 py-6 lg:px-8">{children}</main>
     </div>
