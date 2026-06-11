@@ -56,6 +56,19 @@ const config: Config = {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      // 全站字級放大一階（xs 12→13、sm 14→15、base 16→17…）
+      fontSize: {
+        xs: ["0.8125rem", { lineHeight: "1.15rem" }],
+        sm: ["0.9375rem", { lineHeight: "1.4rem" }],
+        base: ["1.0625rem", { lineHeight: "1.65rem" }],
+        lg: ["1.1875rem", { lineHeight: "1.75rem" }],
+        xl: ["1.3125rem", { lineHeight: "1.85rem" }],
+        "2xl": ["1.5625rem", { lineHeight: "2.1rem" }],
+        "3xl": ["1.9375rem", { lineHeight: "2.4rem" }],
+        "4xl": ["2.375rem", { lineHeight: "2.75rem" }],
+        "5xl": ["3.0625rem", { lineHeight: "1.1" }],
+        "6xl": ["3.8125rem", { lineHeight: "1.1" }],
+      },
       fontFamily: {
         sans: ["var(--font-geist-sans)"],
         mono: ["var(--font-geist-mono)"],

@@ -218,14 +218,14 @@ export default async function DashboardPage() {
             <div className="flex items-end gap-1.5 h-44">
               {trend.map((t) => (
                 <div key={t.label} className="flex-1 flex flex-col items-center gap-1 group">
-                  <span className="text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100">
+                  <span className="text-[11px] text-muted-foreground opacity-0 group-hover:opacity-100">
                     {t.total > 0 ? `$${(t.total / 1000).toFixed(1)}k` : "-"}
                   </span>
                   <div
                     className="w-full rounded-t bg-primary/80 group-hover:bg-primary transition-colors"
                     style={{ height: `${Math.max((t.total / trendMax) * 130, 2)}px` }}
                   />
-                  <span className="text-[10px] text-muted-foreground">{t.label}</span>
+                  <span className="text-[11px] text-muted-foreground">{t.label}</span>
                 </div>
               ))}
             </div>

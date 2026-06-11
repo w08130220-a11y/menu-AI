@@ -107,7 +107,7 @@ export function Sidebar({
           <p className="font-brand font-bold leading-tight text-white">
             Beauty<span className="text-gold">Time</span>
           </p>
-          <p className="text-[11px] text-white/45 leading-tight mt-0.5">{staff.storeName}</p>
+          <p className="text-xs text-white/45 leading-tight mt-0.5">{staff.storeName}</p>
         </div>
       </div>
 
@@ -141,7 +141,7 @@ export function Sidebar({
           if (items.length === 0) return null;
           return (
             <div key={group.title}>
-              <p className="px-2 mb-1.5 text-[11px] font-medium tracking-wider text-white/35">
+              <p className="px-2 mb-1.5 text-xs font-medium tracking-wider text-white/35">
                 {group.title}
               </p>
               <div className="space-y-0.5">
@@ -165,7 +165,7 @@ export function Sidebar({
           );
         })}
         <div>
-          <p className="px-2 mb-1.5 text-[11px] font-medium tracking-wider text-white/35">顧客端</p>
+          <p className="px-2 mb-1.5 text-xs font-medium tracking-wider text-white/35">顧客端</p>
           <a
             href="/booking"
             target="_blank"

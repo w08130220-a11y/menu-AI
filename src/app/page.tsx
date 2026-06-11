@@ -74,7 +74,7 @@ export default function LandingPage() {
                 <LogIn className="mr-1 h-4 w-4" /> 登入
               </Link>
             </Button>
-            <Button asChild size="sm" className="bg-gold text-ink hover:bg-gold/90 font-bold" style={{ color: "hsl(172 45% 8%)" }}>
+            <Button asChild size="sm" className="bg-gold text-ink hover:bg-gold/90 font-bold" style={{ color: "hsl(222 47% 11%)" }}>
               <Link href="/login">免費試用 7 天</Link>
             </Button>
           </div>
@@ -98,7 +98,7 @@ export default function LandingPage() {
             一套系統收齊美容業日常的每一件瑣事，店主只需專注在客人身上。
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg" className="h-12 bg-gold px-8 text-base font-bold hover:bg-gold/90" style={{ color: "hsl(172 45% 8%)" }}>
+            <Button asChild size="lg" className="h-12 bg-gold px-8 text-base font-bold hover:bg-gold/90" style={{ color: "hsl(222 47% 11%)" }}>
               <Link href="/login">免費試用 7 天，不綁卡</Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="h-12 border-white/25 bg-transparent px-8 text-base text-white hover:bg-white/10 hover:text-white">
@@ -220,7 +220,7 @@ export default function LandingPage() {
             今天就讓店務<span className="text-gold">自己動起來</span>
           </h2>
           <p className="mt-3 text-white/60">7 天免費試用，資料隨時匯入匯出，不滿意不收費。</p>
-          <Button asChild size="lg" className="mt-8 h-12 bg-gold px-10 text-base font-bold hover:bg-gold/90" style={{ color: "hsl(172 45% 8%)" }}>
+          <Button asChild size="lg" className="mt-8 h-12 bg-gold px-10 text-base font-bold hover:bg-gold/90" style={{ color: "hsl(222 47% 11%)" }}>
             <Link href="/login">免費開始</Link>
           </Button>
         </div>

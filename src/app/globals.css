@@ -2,61 +2,61 @@
 @tailwind components;
 @tailwind utilities;
 
-/* BeautyTime 品牌色系：墨綠 × 香檳金，編輯感、高級沙龍風 */
+/* BeautyTime 色系：冷靜藍灰（Slate × Blue）— 介面中性、彩色留給資料與狀態，掃讀優先 */
 @layer base {
   :root {
-    --background: 160 25% 98%;
-    --foreground: 172 40% 10%;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 172 40% 10%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 172 40% 10%;
-    --primary: 168 58% 18%;
-    --primary-foreground: 160 30% 98%;
-    --secondary: 162 18% 93%;
-    --secondary-foreground: 170 35% 16%;
-    --muted: 160 16% 94%;
-    --muted-foreground: 168 12% 42%;
-    --accent: 42 62% 48%;
-    --accent-foreground: 172 40% 10%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 221 83% 47%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 214 32% 94%;
+    --secondary-foreground: 222 40% 16%;
+    --muted: 214 32% 95%;
+    --muted-foreground: 215 16% 44%;
+    --accent: 217 91% 55%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 48%;
     --destructive-foreground: 0 0% 100%;
-    --border: 162 14% 88%;
-    --input: 162 14% 86%;
-    --ring: 168 58% 24%;
+    --border: 214 32% 88%;
+    --input: 214 32% 85%;
+    --ring: 221 83% 53%;
     --radius: 0.625rem;
-    --chart-1: 168 58% 28%;
-    --chart-2: 42 62% 48%;
-    --chart-3: 196 64% 38%;
-    --chart-4: 330 45% 48%;
-    --chart-5: 168 25% 55%;
+    --chart-1: 221 83% 53%;
+    --chart-2: 142 71% 38%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 262 70% 55%;
+    --chart-5: 215 20% 55%;
 
-    /* 深色側邊欄 / 形象區塊 */
-    --ink: 172 45% 8%;
-    --ink-soft: 170 32% 13%;
-    --gold: 42 62% 55%;
+    /* 深色側邊欄 / 形象區塊（slate-900）；--gold 為深色面上的品牌點綴（亮藍） */
+    --ink: 222 47% 11%;
+    --ink-soft: 217 33% 17%;
+    --gold: 213 94% 68%;
   }
 
   .dark {
-    --background: 172 40% 7%;
-    --foreground: 160 20% 95%;
-    --card: 172 35% 10%;
-    --card-foreground: 160 20% 95%;
-    --popover: 172 35% 10%;
-    --popover-foreground: 160 20% 95%;
-    --primary: 168 45% 40%;
+    --background: 222 47% 8%;
+    --foreground: 210 40% 96%;
+    --card: 222 40% 11%;
+    --card-foreground: 210 40% 96%;
+    --popover: 222 40% 11%;
+    --popover-foreground: 210 40% 96%;
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 170 25% 16%;
-    --secondary-foreground: 160 20% 90%;
-    --muted: 170 22% 18%;
-    --muted-foreground: 165 12% 60%;
-    --accent: 42 62% 52%;
-    --accent-foreground: 172 40% 10%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 92%;
+    --muted: 217 28% 18%;
+    --muted-foreground: 215 16% 62%;
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 170 22% 20%;
-    --input: 170 22% 20%;
-    --ring: 168 45% 40%;
+    --border: 217 28% 20%;
+    --input: 217 28% 20%;
+    --ring: 217 91% 60%;
   }
 }
 
@@ -100,11 +100,11 @@
     border-color: hsl(var(--gold));
   }
 
-  /* 深色區塊上的細緻紋理 */
+  /* 深色區塊上的細緻光暈 */
   .ink-texture {
     background-image:
-      radial-gradient(ellipse 80% 60% at 70% -10%, hsl(168 40% 22% / 0.55), transparent),
-      radial-gradient(ellipse 50% 40% at 10% 110%, hsl(42 50% 35% / 0.18), transparent);
+      radial-gradient(ellipse 80% 60% at 70% -10%, hsl(221 60% 28% / 0.55), transparent),
+      radial-gradient(ellipse 50% 40% at 10% 110%, hsl(213 80% 50% / 0.12), transparent);
   }
 
   .animate-in {
