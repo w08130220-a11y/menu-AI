@@ -54,13 +54,27 @@ export function PlanCards({
     const data = await res.json().catch(() => ({}));
     setLoadingTier(null);
     if (res.ok) {
-      if (data.url) {
-        window.location.href = data.url;
+      // 綠界定期定額：自動建立表單導向綠界刷卡頁
+      if (data.ecpay) {
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = data.ecpay.action;
+        for (const [k, v] of Object.entries(data.ecpay.params as Record<string, string>)) {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = k;
+          input.value = v;
+          form.appendChild(input);
+        }
+        document.body.appendChild(form);
+        form.submit();
         return;
       }
       toast({
         title: data.trial ? "已開始 7 天免費試用！" : "訂閱已開通",
-        description: "示範模式（未串接金流，正式環境將導向 Stripe 付款頁）",
+        description: data.trial
+          ? "試用不需填寫卡片，到期前完成刷卡即可無縫接續"
+          : "示範模式（設定綠界金鑰後將導向綠界刷卡頁）",
       });
       router.refresh();
     } else {
@@ -201,9 +215,14 @@ export function CancelButton() {
     if (!confirm("確定取消訂閱？目前期間結束前仍可正常使用。")) return;
     setLoading(true);
     const res = await fetch("/api/billing/cancel", { method: "POST" });
+    const data = await res.json().catch(() => ({}));
     setLoading(false);
     if (res.ok) {
-      toast({ title: "已排定期末取消", description: "期間結束前功能不受影響" });
+      toast({
+        title: "已排定期末取消",
+        description: data.note ?? "期間結束前功能不受影響",
+        ...(data.note ? { variant: "destructive" as const } : {}),
+      });
       router.refresh();
     } else {
       toast({ title: "取消失敗", variant: "destructive" });

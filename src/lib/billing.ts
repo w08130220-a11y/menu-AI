@@ -45,8 +45,7 @@ export type SubscriptionInfo = {
   trialUsed: boolean;
   trialEndsAt: Date | null;
   currentPeriodEnd: Date | null;
-  stripeCustomerId: string | null;
-  stripeSubscriptionId: string | null;
+  ecpayMerchantTradeNo: string | null;
   effective: "TRIALING" | "ACTIVE" | "PAST_DUE" | "EXPIRED" | "INACTIVE";
   daysLeft: number | null;
 };

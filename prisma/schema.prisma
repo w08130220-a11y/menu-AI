@@ -148,8 +148,7 @@ model Subscription {
   trialUsed            Boolean   @default(false)
   trialEndsAt          DateTime?
   currentPeriodEnd     DateTime?
-  stripeCustomerId     String?
-  stripeSubscriptionId String?
+  ecpayMerchantTradeNo String? // 綠界定期定額訂單編號（取消時使用）
   updatedAt            DateTime  @updatedAt
   createdAt            DateTime  @default(now())
 }

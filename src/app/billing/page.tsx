@@ -21,7 +21,11 @@ export default async function BillingPage() {
 
   const [sub, usage] = await Promise.all([getSubscription(), getUsage()]);
   const isAdmin = me.role === "ADMIN";
-  const stripeConfigured = !!process.env.STRIPE_SECRET_KEY;
+  const gatewayConfigured = !!(
+    process.env.ECPAY_MERCHANT_ID &&
+    process.env.ECPAY_HASH_KEY &&
+    process.env.ECPAY_HASH_IV
+  );
   const locked = isLocked(sub);
   const tierLabel = isTierKey(sub.tier) ? TIERS[sub.tier].label : sub.tier;
   const tierInfo = isTierKey(sub.tier) ? TIERS[sub.tier] : null;
@@ -95,9 +99,9 @@ export default async function BillingPage() {
             />
             <div className="mt-6 flex items-center justify-between">
               <p className="text-xs text-muted-foreground">
-                {stripeConfigured
-                  ? "付款由 Stripe 安全處理，卡號不經過本系統。"
-                  : "目前為示範模式：點擊訂閱會直接開通。設定 Stripe 金鑰與價格 ID 後即切換為線上付款。"}
+                {gatewayConfigured
+                  ? "付款由綠界 ECPay 安全處理（信用卡定期定額），卡號不經過本系統。"
+                  : "目前為示範模式：點擊訂閱會直接開通。設定綠界 ECPay 金鑰後即切換為線上刷卡（定期定額自動扣款）。"}
               </p>
               {(sub.effective === "ACTIVE" || sub.effective === "TRIALING") &&
                 sub.status !== "CANCELED" && <CancelButton />}

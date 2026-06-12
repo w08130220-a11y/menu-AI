@@ -58,7 +58,7 @@ export default async function PayPage({ params }: { params: Promise<{ id: string
         <p className="mt-6 text-center text-xs text-muted-foreground">
           示範模式：未串接金流，不會實際扣款。
           <br />
-          正式環境可串接綠界 ECPay／藍新 NewebPay／Stripe（介面已預留）。
+          正式環境可串接綠界 ECPay 一次性付款（介面已預留）。
         </p>
       </main>
     </div>
