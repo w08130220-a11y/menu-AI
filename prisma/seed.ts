@@ -62,7 +62,7 @@ async function main() {
     { storeId: store1.id, name: "王雅婷", email: "admin@beautytime.tw", password: "admin123", role: "ADMIN", title: "品牌總監", baseSalary: 45000, serviceCommission: 0.15, productCommission: 0.08, color: "#f97316" },
     { storeId: store1.id, name: "陳思好", email: "siyu@beautytime.tw", password: "staff123", role: "STAFF", title: "髮型設計師", baseSalary: 30000, serviceCommission: 0.12, productCommission: 0.05, color: "#10b981" },
     { storeId: store1.id, name: "林佳穎", email: "jiaying@beautytime.tw", password: "staff123", role: "STAFF", title: "美甲 / 美睫師", baseSalary: 28000, serviceCommission: 0.12, productCommission: 0.05, color: "#3b82f6" },
-    { storeId: store1.id, name: "張惠如", email: "huiru@beautytime.tw", password: "staff123", role: "STAFF", title: "芳療按摩師", baseSalary: 28000, serviceCommission: 0.1, productCommission: 0.05, color: "#a855f7" },
+    { storeId: store1.id, name: "張惠如", email: "huiru@beautytime.tw", password: "staff123", role: "STAFF", title: "芳療按摩師", baseSalary: 28000, serviceCommission: 0.1, productCommission: 0.05, color: "#06b6d4" },
     { storeId: store1.id, name: "李美慧", email: "meihui@beautytime.tw", password: "staff123", role: "STAFF", title: "美容師", payType: "HOURLY", baseSalary: 0, hourlyRate: 220, serviceCommission: 0.1, productCommission: 0.05, color: "#ec4899" },
     { storeId: store2.id, name: "周冠廷", email: "kuanting@beautytime.tw", password: "manager123", role: "MANAGER", title: "信義店店長 / 髮型師", baseSalary: 40000, serviceCommission: 0.13, productCommission: 0.06, color: "#0ea5e9" },
     { storeId: store2.id, name: "許芳瑜", email: "fangyu@beautytime.tw", password: "staff123", role: "STAFF", title: "美甲師", baseSalary: 28000, serviceCommission: 0.12, productCommission: 0.05, color: "#14b8a6" },

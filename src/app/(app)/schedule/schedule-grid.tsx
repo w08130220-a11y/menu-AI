@@ -18,9 +18,9 @@ import { useToast } from "@/hooks/use-toast";
 
 const PRESETS = ["FULL", "MORNING", "EVENING", "OFF"];
 const STYLE: Record<string, string> = {
-  FULL: "bg-primary/15 text-primary border-primary/30",
+  FULL: "bg-primary/10 text-primary border-primary/25",
   MORNING: "bg-sky-100 text-sky-700 border-sky-200",
-  EVENING: "bg-violet-100 text-violet-700 border-violet-200",
+  EVENING: "bg-orange-100 text-orange-700 border-orange-200",
   CUSTOM: "bg-emerald-100 text-emerald-700 border-emerald-200",
   OFF: "bg-muted text-muted-foreground border-transparent",
 };
@@ -84,7 +84,7 @@ export function ScheduleGrid({
       <>
         {type === "CUSTOM" ? "自訂" : SHIFT_TYPES[type].label}
         <br />
-        <span className="font-normal opacity-80">
+        <span className="font-normal opacity-80 whitespace-nowrap text-[11px]">
           {cell!.startTime}-{cell!.endTime}
         </span>
       </>
@@ -104,9 +104,9 @@ export function ScheduleGrid({
             下週 <ChevronRight className="h-4 w-4" />
           </Link>
         </Button>
-        <div className="ml-auto flex items-center gap-3 text-xs text-muted-foreground">
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-x-3 gap-y-1 text-xs text-muted-foreground">
           {["FULL", "MORNING", "EVENING", "CUSTOM", "OFF"].map((t) => (
-            <span key={t} className="flex items-center gap-1">
+            <span key={t} className="flex items-center gap-1 whitespace-nowrap">
               <span className={`inline-block h-3 w-3 rounded border ${STYLE[t]}`} />
               {SHIFT_TYPES[t].label}
             </span>
@@ -115,10 +115,10 @@ export function ScheduleGrid({
       </div>
 
       <div className="overflow-x-auto rounded-lg border bg-card">
-        <table className="w-full text-sm">
+        <table className="w-full table-fixed text-sm min-w-[880px]">
           <thead>
             <tr className="border-b bg-muted/40">
-              <th className="px-3 py-2.5 text-left font-medium w-36">員工</th>
+              <th className="px-3 py-2.5 text-left font-medium w-44">員工</th>
               {weekDates.map((d) => {
                 const date = new Date(`${d}T00:00:00`);
                 const isToday = d === todayStr;
@@ -141,12 +141,11 @@ export function ScheduleGrid({
             {staffList.map((s) => (
               <tr key={s.id}>
                 <td className="px-3 py-2">
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-2 min-w-0">
                     <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: s.color }} />
-                    <span>
-                      <span className="font-medium">{s.name}</span>
-                      <br />
-                      <span className="text-xs text-muted-foreground">{s.title}</span>
+                    <span className="min-w-0">
+                      <span className="block font-medium truncate">{s.name}</span>
+                      <span className="block text-xs text-muted-foreground truncate">{s.title}</span>
                     </span>
                   </span>
                 </td>

@@ -158,7 +158,7 @@ export default async function DashboardPage() {
           sub={pendingCount > 0 ? `${pendingCount} 筆待確認` : "皆已確認"}
         />
         <StatCard
-          icon={<Clock className="h-5 w-5 text-purple-600" />}
+          icon={<Clock className="h-5 w-5 text-cyan-600" />}
           label="今日出勤"
           value={`${todayClockIns} / ${staffCount} 人`}
           sub={`本月新客 ${monthNewCustomers} 位`}
